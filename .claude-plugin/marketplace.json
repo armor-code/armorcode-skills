@@ -11,7 +11,7 @@
     {
       "name": "armorcode",
       "source": "./plugins/armorcode",
-      "description": "Safe, guided access to the ArmorCode REST API: findings, org hierarchy, teams, repositories, scans and bulk triage, with dry runs, approvals, backups and verification on every change.",
+      "description": "Guided access to the ArmorCode REST API: findings, org hierarchy, teams, repositories, scans and bulk triage, with dry runs, approvals, backups and verification on every change.",
       "version": "1.0.0",
       "category": "security"
     }

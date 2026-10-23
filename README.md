@@ -1,6 +1,6 @@
 # ArmorCode for Claude
 
-Work with your ArmorCode tenant from Claude in plain language, safely enough for production.
+Work with your ArmorCode tenant from Claude in plain language, with guardrails that show you every change before it happens.
 
 > "Show me open critical findings on external-facing apps under the Payments hierarchy, by group."
 > "Export our org hierarchy to a file I can keep in git, then add a new product line with three subgroups."
@@ -18,7 +18,7 @@ The plugin contains one Agent Skill, **`armorcode-api`**. It ships with a depend
 - **Accept risk properly:** exceptions created per group from one AQL, then submitted, approved and archived, with reasons, reviewers and expiry.
 - **Integrate:** scan uploads (with the replace-semantics warning), tool and ticket mappings, runbooks, saved views, dashboards and the audit log.
 
-## How it keeps production safe
+## Guardrails
 
 | Guardrail | What it means |
 |---|---|
@@ -32,6 +32,16 @@ The plugin contains one Agent Skill, **`armorcode-api`**. It ships with a depend
 | Audit trail | Every applied step is logged locally (`~/.armorcode/audit.jsonl`), in addition to ArmorCode's own audit log |
 | Key never shown | The API key is read from an environment variable, the macOS Keychain or a 0600 file. It is never printed, logged or written into plans, and never sent across a redirect |
 | No side doors | The CLI refuses to send any change outside `apply`, and plans are signed per machine, so a plan edited after review won't run |
+
+## Using it is your call
+
+The guardrails above reduce the risk of mistakes; they don't eliminate it. Claude can misread a request, and the ArmorCode API can change. You decide whether to use the skill, which tenants and keys to use it with, and whether to approve each change. Changes made through it are made with your API key and count as your changes.
+
+Sensible ways to start:
+- Use a **read-only key** first: reporting, exports and planning never change anything.
+- Try changes in a **non-production tenant or organization** before using a change-capable key elsewhere.
+- **Read every plan** before approving it, and pilot large changes on a small slice.
+- Keep keys scoped to what you need (a hierarchy or specific groups), with an expiry.
 
 ## Requirements
 
@@ -60,7 +70,7 @@ Upload `dist/armorcode-api.zip` under your skills settings (Settings > Capabilit
    ```
    security add-generic-password -s armorcode-prod -a "$USER" -w
    ```
-3. Ask Claude: *"Set up the ArmorCode skill for our production tenant using the ARMORCODE_TOKEN variable."* Claude creates a read-only profile and checks connectivity.
+3. Ask Claude: *"Set up the ArmorCode skill for our tenant using the ARMORCODE_TOKEN variable."* Claude creates a read-only profile and checks connectivity.
 4. When you want changes, create a second, change-capable key and ask Claude for a read-write profile labelled clearly (e.g. "PRODUCTION (changes)").
 
 Never paste an API key into the chat. If one is pasted, revoke it and create a new one.

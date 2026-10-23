@@ -1,6 +1,6 @@
 ---
 name: armorcode-api
-description: Work with an ArmorCode tenant through the ArmorCode REST API, safely, including in production. Use it to report on findings, risk, SLAs and scans; build, audit and clean up the org hierarchy (organizations, groups, subgroups, armorcode.group tags, tiers) and keep it as code; manage teams, users, repository mappings, exceptions, runbooks, tickets, saved views and dashboards; triage or move findings in bulk; and upload scan results. Every change is planned as a dry run, approved by the user, applied with backups and verified. Use it whenever someone wants to query, export, audit, change or automate anything in ArmorCode, replace click-ops with the API, check AQL against a live tenant, or mentions an ArmorCode API key, tenant or endpoint, even if they don't say "API". Not for general ArmorCode product questions that don't involve a tenant.
+description: Work with an ArmorCode tenant through the ArmorCode REST API, with guardrails. Use it to report on findings, risk, SLAs and scans; build, audit and clean up the org hierarchy (organizations, groups, subgroups, armorcode.group tags, tiers) and keep it as code; manage teams, users, repository mappings, exceptions, runbooks, tickets, saved views and dashboards; triage or move findings in bulk; and upload scan results. Every change is planned as a dry run, approved by the user, applied with backups and verified. Use it whenever someone wants to query, export, audit, change or automate anything in ArmorCode, replace click-ops with the API, check AQL against a live tenant, or mentions an ArmorCode API key, tenant or endpoint, even if they don't say "API". Not for general ArmorCode product questions that don't involve a tenant.
 compatibility: Requires Python 3.8+ and HTTPS access to your ArmorCode host (app.armorcode.com by default). Built for Claude Code, Claude Desktop and Cowork. In claude.ai the code sandbox must be allowed to reach that host.
 metadata:
   version: "1.0.0"
@@ -9,7 +9,7 @@ metadata:
 
 # ArmorCode API
 
-This skill lets you read and change an ArmorCode tenant through its REST API, with guardrails suited to production. It ships with `scripts/ac.py`, a dependency-free Python CLI that does the HTTP work and handles the API's quirks: pagination, rate limits, full-replace endpoints, async jobs and silent no-ops. Use it rather than hand-written curl.
+This skill lets you read and change an ArmorCode tenant through its REST API, with guardrails. The guardrails reduce risk but don't remove it. Whether to work against a production tenant, and whether to approve each change, is always the user's decision; never describe the skill as production-safe. It ships with `scripts/ac.py`, a dependency-free Python CLI that does the HTTP work and handles the API's quirks: pagination, rate limits, full-replace endpoints, async jobs and silent no-ops. Use it rather than hand-written curl.
 
 Below, `ac.py` means `python3 <this skill's directory>/scripts/ac.py`. In Claude Code that path is `${CLAUDE_SKILL_DIR}/scripts/ac.py`.
 
