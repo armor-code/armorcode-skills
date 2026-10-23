@@ -51,17 +51,17 @@ Sensible ways to start:
 
 ## Install
 
-### Claude Code (recommended)
-```
-/plugin marketplace add <this repository's URL or local path>
-/plugin install armorcode@armorcode
-```
-Administrators can preinstall it for everyone through managed settings (`extraKnownMarketplaces` and `enabledPlugins`).
+One file, `armorcode-plugin-1.0.0.zip` (built by `tools/build.py`), works everywhere. It holds the plugin (skill and approval hook) with its manifest at the top level, plus a marketplace file so Claude Code can install it from the unzipped folder.
 
-### Claude Desktop, Cowork or claude.ai
-Upload `dist/armorcode-api.zip` under your skills settings (Settings > Capabilities/Customize > Skills), or have an organization admin add it to the org skill library.
-- On claude.ai, live calls need network access from the code sandbox to your ArmorCode host. Without it, use the skill for planning and review only.
-- Hooks don't run in plain chat, so the guardrails there rest on the skill's plan and apply flow.
+| Where you use Claude | How to install | Approval hook |
+|---|---|---|
+| **Claude Desktop app: Cowork and chat** | Customize > Plugins > Add > **Upload plugin**, then choose the zip | Runs in Cowork; not in chat |
+| **Claude Desktop app: Code tab**, Claude Code terminal or IDE | Unzip it (`unzip armorcode-plugin-1.0.0.zip -d ~/armorcode-plugin`), then in Claude Code run `/plugin marketplace add ~/armorcode-plugin` and `/plugin install armorcode@armorcode` (or use **+ > Add plugins** in the Desktop Code tab). From a terminal: `claude plugin marketplace add ~/armorcode-plugin` and `claude plugin install armorcode@armorcode` | Yes |
+| **Everyone in an organization** | An admin uses Organization settings > Plugins & skills > Add > **Upload plugin** (or syncs this repo), and sets availability | As above, per surface |
+| **Skill only, in chat** | Customize > Skills: upload `armorcode-api-skill-1.0.0.zip` | No |
+
+- Where the hook doesn't run (chat), the guardrails rest on the skill's plan-and-approve flow and the CLI's own write gate.
+- In chat on claude.ai, live calls need network access from the code sandbox to your ArmorCode host. Without it, use the skill for reference and drafting only.
 
 ## Setup (five minutes)
 
@@ -105,7 +105,7 @@ plugins/armorcode/.claude-plugin/plugin.json
 plugins/armorcode/hooks/                 approval-prompt hook (Claude Code / Cowork)
 plugins/armorcode/skills/armorcode-api/  the skill: SKILL.md, references/, scripts/ac.py, assets/
 docs/guide/                              getting-started guide (HTML source; render to PDF with headless Chrome)
-tools/build.py                           validates the skill and builds dist/armorcode-api.zip
+tools/build.py                           validates the skill and builds dist/armorcode-plugin-<ver>.zip (+ skill-only zip)
 tests/                                   offline tests: guardrail hook decisions and CLI safety logic
 evals/                                   behavior test prompts for the skill
 ```

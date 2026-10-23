@@ -104,11 +104,11 @@ tbody tr:nth-child(even){background:var(--pale)}
 
 <div class="section-head" style="margin-top:8px"><img src="assets/logo-icon.png" alt=""><span class="num">1</span><h2>Before you start</h2></div>
 <ul class="check">
-  <li><strong>Claude Code</strong> (terminal, IDE extension, or the Code tab in Claude Desktop) is the recommended surface. Claude Desktop chat and claude.ai work with limits (see Install).</li>
+  <li><strong>The Claude Desktop app</strong> (Code tab or Cowork) or <strong>Claude Code</strong> in a terminal or IDE. These run the plugin's approval prompt. Plain chat works with limits (see Install).</li>
   <li><strong>Python 3.8 or later</strong> on the machine where Claude runs commands. macOS and most Linux systems already have it.</li>
   <li><strong>HTTPS access</strong> from that machine to your ArmorCode host: <code>app.armorcode.com</code>, <code>eu.armorcode.com</code>, or your private instance.</li>
   <li>An ArmorCode user whose role can create API keys (the <em>Create Tools</em> permission).</li>
-  <li>The two files from your ArmorCode team: <code>armorcode-claude-plugin-1.0.0.zip</code> (Claude Code) and <code>armorcode-api-skill-1.0.0.zip</code> (Claude Desktop chat / claude.ai).</li>
+  <li>One file from your ArmorCode team: <code>armorcode-plugin-1.0.0.zip</code>.</li>
 </ul>
 
 
@@ -116,26 +116,32 @@ tbody tr:nth-child(even){background:var(--pale)}
 <div class="page">
 <div class="section-head"><img src="assets/logo-icon.png" alt=""><span class="num">2</span><h2>Install</h2></div>
 
-<h3 style="margin-top:0">Option A: Claude Code (recommended)</h3>
-<p>The plugin adds the skill <em>and</em> an approval hook. Claude Code then asks you before any change is sent to ArmorCode, even if Claude decided it should go ahead.</p>
-<pre><span class="c"># 1. Unzip the plugin somewhere it can stay, for example your home folder</span>
-unzip armorcode-claude-plugin-1.0.0.zip -d ~
-<span class="c">#    → creates ~/armorcode-claude</span>
+<p style="margin-top:0">The same zip, <code>armorcode-plugin-1.0.0.zip</code>, works in every Claude app. It contains the skill and an approval hook: where the hook runs, Claude asks you before any change is sent to ArmorCode, even if Claude decided it should go ahead.</p>
 
-<span class="c"># 2. Register it and install (in a terminal)</span>
-claude plugin marketplace add ~/armorcode-claude
-claude plugin install armorcode@armorcode
-
-<span class="c"># 3. Check it's enabled, then start a new Claude Code session</span>
-claude plugin list</pre>
-<p class="muted">You can also run these inside Claude Code as <code>/plugin marketplace add ~/armorcode-claude</code> and <code>/plugin install armorcode@armorcode</code>. Keep the <code>~/armorcode-claude</code> folder; updates are installed from it.</p>
-
-<h3>Option B: Claude Desktop chat or claude.ai</h3>
+<h3>Claude Desktop app: Cowork and chat</h3>
 <ol>
-  <li>Open Claude's settings, go to <strong>Skills</strong>, and choose <strong>Upload skill</strong>.</li>
-  <li>Upload <code>armorcode-api-skill-1.0.0.zip</code> as is (don't unzip it). Organization admins can add it for everyone instead.</li>
+  <li>Open <strong>Customize › Plugins › Add › Upload plugin</strong>.</li>
+  <li>Choose <code>armorcode-plugin-1.0.0.zip</code> as is (don't unzip it).</li>
 </ol>
-<div class="note warn"><strong>Limits outside Claude Code.</strong> Chat surfaces don't run the approval hook, so the skill's plan-and-approve step is the only safeguard. On claude.ai, the code sandbox can only reach your ArmorCode host if your admin allows that network access. Without it, use the skill for drafting and reference, and never paste an API key into a chat.</div>
+
+<h3>Claude Desktop app: Code tab (and Claude Code in a terminal or IDE)</h3>
+<pre><span class="c"># 1. Unzip it somewhere it can stay</span>
+unzip armorcode-plugin-1.0.0.zip -d ~/armorcode-plugin
+
+<span class="c"># 2. In a Claude Code session (Desktop Code tab, terminal or IDE)</span>
+/plugin marketplace add ~/armorcode-plugin
+/plugin install armorcode@armorcode
+<span class="c">#    (in the Desktop Code tab you can also use + › Add plugins)</span>
+
+<span class="c"># or from a terminal</span>
+claude plugin marketplace add ~/armorcode-plugin
+claude plugin install armorcode@armorcode</pre>
+<p class="muted">Start a new session afterwards. Keep the <code>~/armorcode-plugin</code> folder; updates are installed from it.</p>
+
+<h3>For everyone in your organization</h3>
+<p>A Claude organization admin can add it once under <strong>Organization settings › Plugins &amp; skills › Add › Upload plugin</strong>, and choose whether members can install it or get it by default.</p>
+
+<div class="note warn"><strong>Where the approval prompt runs.</strong> The hook runs in the Desktop Code tab, Cowork, and Claude Code in a terminal or IDE. It doesn't run in plain chat, where the plan-and-approve step and the CLI's own refusal to send unapproved changes are the safeguards. In chat on claude.ai, live calls also need your admin to allow network access to your ArmorCode host. Never paste an API key into a chat.</div>
 
 <div class="section-head" style="margin-top:16px"><img src="assets/logo-icon.png" alt=""><span class="num">3</span><h2>Create and store your API key</h2></div>
 <ol>
@@ -266,13 +272,14 @@ Apply     ac.py apply p-20261023-173030-49b7 --confirm f41f57</pre>
     <tr><td>HTTP 403</td><td>The key's role or scope doesn't allow that call, or it isn't an <em>API</em>-type key.</td></tr>
     <tr><td><code>REFUSED: …</code></td><td>A guardrail stopped something on purpose: a read-only profile, a filter typo, a count over the cap, a plan edited after review. The message says what to do.</td></tr>
     <tr><td>Counts differ from the UI</td><td>Ask Claude to reconcile them. Usual causes are status definitions, environment filters, organization scope, or a minute of indexing delay after big changes.</td></tr>
-    <tr><td>The skill doesn't appear</td><td>Run <code>claude plugin list</code>. It should show <code>armorcode@armorcode</code> as enabled. Start a new session after installing.</td></tr>
+    <tr><td>The skill doesn't appear</td><td>Desktop app: check <strong>Customize › Plugins</strong>. Claude Code: run <code>/plugin</code> (or <code>claude plugin list</code>); it should show <code>armorcode@armorcode</code> enabled. Start a new session after installing.</td></tr>
     <tr><td>Network or proxy errors</td><td>The machine must reach your ArmorCode host over HTTPS. Behind a proxy, set <code>HTTPS_PROXY</code>.</td></tr>
   </tbody>
 </table>
 
 <div class="section-head" style="margin-top:16px"><img src="assets/logo-icon.png" alt=""><span class="num">11</span><h2>Updating and removing</h2></div>
-<pre><span class="c"># update: replace ~/armorcode-claude with the new version, then</span>
+<p style="margin-top:0"><strong>Desktop app (Cowork and chat):</strong> upload the new zip under Customize › Plugins, replacing the old version. Remove it from the same screen.</p>
+<pre><span class="c"># Claude Code / Desktop Code tab, update: unzip the new version over ~/armorcode-plugin, then</span>
 claude plugin marketplace update armorcode
 claude plugin update armorcode@armorcode
 

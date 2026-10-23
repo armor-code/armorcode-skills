@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate the armorcode plugin and build the distributable skill zip.
 
-    python3 tools/build.py            # validate + build dist/armorcode-api.zip
+    python3 tools/build.py            # validate + build dist/armorcode-plugin-<ver>.zip and the skill zip
     python3 tools/build.py --check    # validate only
 
 Checks: SKILL.md frontmatter against the open Agent Skills spec (only name, description, license,
@@ -95,12 +95,29 @@ def validate():
 
 def build():
     DIST.mkdir(exist_ok=True)
-    out = DIST / "armorcode-api.zip"
-    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+    version = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"]
+
+    # 1. The plugin, with .claude-plugin/plugin.json at the top level, which is what the Desktop app's
+    #    Customize > Plugins > Upload plugin and an org admin's Upload plugin expect. It also carries a
+    #    marketplace.json whose plugin source is "./", so the same unzipped folder can be added with
+    #    `/plugin marketplace add <folder>` in Claude Code (terminal, IDE, Desktop Code tab).
+    market = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
+    market["plugins"][0]["source"] = "./"
+    plugin_zip = DIST / f"armorcode-plugin-{version}.zip"
+    with zipfile.ZipFile(plugin_zip, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in sorted(PLUGIN.rglob("*")):
+            if f.is_file() and not (set(f.parts) & EXCLUDE):
+                z.write(f, f.relative_to(PLUGIN))
+        z.writestr(".claude-plugin/marketplace.json", json.dumps(market, indent=2) + "\n")
+    print(f"Built {plugin_zip} ({plugin_zip.stat().st_size:,} bytes)")
+
+    # 2. The skill on its own, for Customize > Skills upload in chat.
+    skill_zip = DIST / f"armorcode-api-skill-{version}.zip"
+    with zipfile.ZipFile(skill_zip, "w", zipfile.ZIP_DEFLATED) as z:
         for f in sorted(SKILL.rglob("*")):
             if f.is_file() and not (set(f.parts) & EXCLUDE):
                 z.write(f, Path("armorcode-api") / f.relative_to(SKILL))
-    print(f"Built {out} ({out.stat().st_size:,} bytes)")
+    print(f"Built {skill_zip} ({skill_zip.stat().st_size:,} bytes)")
 
 
 if __name__ == "__main__":
