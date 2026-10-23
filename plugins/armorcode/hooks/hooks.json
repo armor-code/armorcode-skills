@@ -1,0 +1,17 @@
+{
+  "description": "ArmorCode guardrails: ask before any change to an ArmorCode tenant; never expose API keys; protect ac.py's local state.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit|mcp__.*[Aa][Rr][Mm][Oo][Rr][Cc][Oo][Dd][Ee].*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "format": "armorcode-hierarchy/v1",
+  "groups": [
+    {
+      "name": "Payments Platform",
+      "hierarchy": ["acme/payments"],
+      "tier": "1",
+      "status": "Active",
+      "description": "Card processing and settlement services",
+      "tags": ["owner:payments-eng", "business-impact:critical", "compliance:true", "data-sensitivity:high", "ext-facing:true"],
+      "subgroups": [
+        {"name": "acme/payments-api", "tags": ["component:api"]},
+        {"name": "acme/payments-worker", "tags": ["component:worker"]}
+      ]
+    },
+    {
+      "name": "Payments Infrastructure",
+      "hierarchy": ["acme/payments"],
+      "tier": "1",
+      "tags": ["owner:payments-sre"],
+      "subgroups": [
+        {"name": "payments-prod-aws", "tags": ["cloud:aws"]}
+      ]
+    }
+  ]
+}
