@@ -104,6 +104,7 @@ Before each release, the maintainers also run a live regression against a non-pr
 plugins/armorcode/.claude-plugin/plugin.json
 plugins/armorcode/hooks/                 approval-prompt hook (Claude Code / Cowork)
 plugins/armorcode/skills/armorcode-api/  the skill: SKILL.md, references/, scripts/ac.py, assets/
+docs/guide/                              getting-started guide (HTML source; render to PDF with headless Chrome)
 tools/build.py                           validates the skill and builds dist/armorcode-api.zip
 tests/                                   offline tests: guardrail hook decisions and CLI safety logic
 evals/                                   behavior test prompts for the skill
