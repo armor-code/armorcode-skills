@@ -16,6 +16,7 @@ Open an issue with the plugin version, your agent and OS, what you asked the age
    python3 tools/build.py --check
    python3 tests/test_cli.py
    python3 tests/test_guard.py
+   actionlint                     # if you changed .github/workflows (brew install actionlint)
    ```
 5. For a release, bump the version in `plugins/armorcode/.claude-plugin/plugin.json`, `plugins/armorcode/plugin.json`, `.claude-plugin/marketplace.json` (both places), the skill's `metadata.version` in `SKILL.md` and `VERSION` in `ac.py` (`tools/build.py --check` fails if they disagree), and add a `CHANGELOG.md` entry.
 

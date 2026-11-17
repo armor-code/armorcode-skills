@@ -37,8 +37,6 @@ jobs:
   agents:
     name: Installs in each agent
     runs-on: ubuntu-latest
-    env:
-      HOME_DIR: ${{ runner.temp }}/agent-home
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -60,20 +58,20 @@ jobs:
           claude plugin validate --strict plugins/armorcode
       - name: Skills installer (Gemini CLI, Cursor, and others)
         run: |
-          export HOME="$HOME_DIR"; mkdir -p "$HOME"
+          export HOME="$RUNNER_TEMP/agent-home"; mkdir -p "$HOME"
           skills add "$GITHUB_WORKSPACE" --list | grep -q armorcode-api
           skills add "$GITHUB_WORKSPACE" -g -y -a codex -a gemini-cli -a cursor -a github-copilot
           python "$HOME/.agents/skills/armorcode-api/scripts/ac.py" --version
           gemini skills list | grep -q armorcode-api
       - name: Codex plugin
         run: |
-          export HOME="$HOME_DIR" CODEX_HOME="$HOME_DIR/.codex"; mkdir -p "$CODEX_HOME"
+          export HOME="$RUNNER_TEMP/agent-home" CODEX_HOME="$RUNNER_TEMP/agent-home/.codex"; mkdir -p "$CODEX_HOME"
           codex plugin marketplace add "$GITHUB_WORKSPACE"
           codex plugin add armorcode@armorcode
           test -f "$CODEX_HOME"/plugins/cache/armorcode/armorcode/*/skills/armorcode-api/SKILL.md
       - name: GitHub Copilot CLI plugin
         run: |
-          export HOME="$HOME_DIR"
+          export HOME="$RUNNER_TEMP/agent-home"
           copilot plugin marketplace add "$GITHUB_WORKSPACE"
           copilot plugin install armorcode@armorcode
           copilot plugin list | grep -q armorcode@armorcode
