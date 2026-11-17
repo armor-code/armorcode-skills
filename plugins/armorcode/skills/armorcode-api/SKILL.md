@@ -2,7 +2,7 @@
 name: armorcode-api
 description: Work with an ArmorCode tenant through the ArmorCode REST API, with guardrails. Use it to report on findings, risk, SLAs and scans; build, audit and clean up the org hierarchy (organizations, groups, subgroups, armorcode.group tags, tiers) and keep it as code; manage teams, users, repository mappings, exceptions, runbooks, tickets, saved views and dashboards; triage or move findings in bulk; and upload scan results. Every change is planned as a dry run, approved by the user, applied with backups and verified. Use it whenever someone wants to query, export, audit, change or automate anything in ArmorCode, replace click-ops with the API, check AQL against a live tenant, or mentions an ArmorCode API key, tenant or endpoint, even if they don't say "API". Not for general ArmorCode product questions that don't involve a tenant.
 license: Apache-2.0
-compatibility: Requires Python 3.8+ and HTTPS access to your ArmorCode host (app.armorcode.com by default). Built for Claude Code, Claude Desktop and Cowork. In claude.ai the code sandbox must be allowed to reach that host.
+compatibility: Requires Python 3.8+ and HTTPS access to your ArmorCode host (app.armorcode.com by default). Works in any agent that supports Agent Skills and can run local commands, such as Claude Code, Codex, GitHub Copilot, Cursor, Gemini CLI, Grok Build and others. In chat apps the code sandbox must be allowed to reach that host.
 metadata:
   version: "1.2.0"
   publisher: ArmorCode
@@ -12,7 +12,7 @@ metadata:
 
 This skill lets you read and change an ArmorCode tenant through its REST API, with guardrails. The guardrails reduce risk but don't remove it. Whether to work against a production tenant, and whether to approve each change, is always the user's decision; never describe the skill as production-safe. It ships with `scripts/ac.py`, a dependency-free Python CLI that does the HTTP work and handles the API's quirks: pagination, rate limits, full-replace endpoints, async jobs and silent no-ops. Use it rather than hand-written curl.
 
-Below, `ac.py` means `python3 <this skill's directory>/scripts/ac.py`. In Claude Code that path is `${CLAUDE_SKILL_DIR}/scripts/ac.py`. On Windows, where `python3` is often missing, use `python` or `py -3` instead; check once with `python --version` (3.8+ needed).
+Below, `ac.py` means `python3 <this skill's directory>/scripts/ac.py`. Resolve it from the folder this SKILL.md was loaded from; Claude Code also exposes that folder as `${CLAUDE_SKILL_DIR}`. On Windows, where `python3` is often missing, use `python` or `py -3` instead; check once with `python --version` (3.8+ needed).
 
 ## The safety contract
 
@@ -41,7 +41,7 @@ If `ac.py` can't reach the host (proxy, sandbox egress, VPN), say so and stop. D
 1. **Read the current state** with the read commands, so the plan is based on facts. If the request's premise doesn't hold, don't plan; report what you found and ask. That covers a selection that matches nothing, far more than expected, or something other than what the user described. `aql-check` breaks a zero-match query down by condition. Show where matches *do* exist.
 2. **Build the plan** with the most specific helper (table below). The helpers encode the API's traps: they re-read objects and merge at apply time, keep fields you didn't touch, dedupe tags, chunk ids and record prior values. Use `ac.py plan raw` only when no helper fits, after reading the relevant reference file.
 3. **Show the dry run.** Relay the plan id, tenant, risk, the diff lines and every WARNING, then ask a direct question, e.g. "Apply this to PRODUCTION?" Stop and wait.
-4. **On an explicit yes**, run the `apply` command the plan printed, including its `--confirm` code. A plan only applies with the profile it was built on. If that profile is read-only, ask the user whether to set up (or use) a read-write profile, then rebuild the plan with `--profile NAME` and show it again. Add `--allow-destructive` or `--allow-large` only when the plan asks for it *and* the user approved that specifically. In Claude Code and Cowork, the ArmorCode plugin also shows its own approval prompt; that is expected. On other surfaces there is no second prompt, so the plan-and-approve step is the only safeguard: never skip it.
+4. **On an explicit yes**, run the `apply` command the plan printed, including its `--confirm` code. A plan only applies with the profile it was built on. If that profile is read-only, ask the user whether to set up (or use) a read-write profile, then rebuild the plan with `--profile NAME` and show it again. Add `--allow-destructive` or `--allow-large` only when the plan asks for it *and* the user approved that specifically. Where the ArmorCode plugin's hook runs with approval prompts (Claude Code, Cowork), it also asks the user; that is expected. Everywhere else, including Codex (whose hooks can block but not prompt) and plain skill installs, there may be no second prompt, so the plan-and-approve step is the safeguard: never skip it.
 5. **Report the result**: what changed, what was verified, where the backup is, and anything still settling, such as async jobs or scan processing. If a step failed, `apply` stopped there. Explain why and re-run the same command to resume after fixing the cause. Never improvise a different write to "fix" a failed one without a new plan.
 
 Undo paths:
@@ -78,7 +78,7 @@ Read the matching reference before planning anything beyond a single helper call
 
 | Task | Reference |
 |---|---|
-| API keys, key types and scopes, profiles, secrets, network, Claude surfaces | `references/setup.md` |
+| API keys, key types and scopes, profiles, secrets, network, which agents and apps | `references/setup.md` |
 | Organizations, groups, subgroups, environments, hierarchy tags, tiers, tag rules, repo mapping, hierarchy as code, sprawl cleanup | `references/org-model.md` |
 | Findings search, counts, exports, statuses, bulk triage, moves, tags, correlation, draining landing zones | `references/findings.md` |
 | AQL v2 syntax, fields and operators, validating a query | `references/aql.md` |

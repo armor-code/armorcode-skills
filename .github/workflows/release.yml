@@ -37,7 +37,7 @@ jobs:
         run: |
           google-chrome --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
             --virtual-time-budget=10000 \
-            --print-to-pdf="dist/ArmorCode-for-Claude-Getting-Started-${VERSION}.pdf" \
+            --print-to-pdf="dist/ArmorCode-Getting-Started-${VERSION}.pdf" \
             "file://$PWD/docs/guide/getting-started.html"
 
       - name: Release notes from CHANGELOG
@@ -50,6 +50,6 @@ jobs:
           gh release create "$GITHUB_REF_NAME" \
             "dist/armorcode-plugin-${VERSION}.zip" \
             "dist/armorcode-api-skill-${VERSION}.zip" \
-            "dist/ArmorCode-for-Claude-Getting-Started-${VERSION}.pdf" \
-            --title "ArmorCode for Claude ${VERSION}" \
+            "dist/ArmorCode-Getting-Started-${VERSION}.pdf" \
+            --title "ArmorCode Skills ${VERSION}" \
             --notes-file dist/notes.md

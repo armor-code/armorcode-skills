@@ -17,8 +17,8 @@
       "author": {
         "name": "ArmorCode"
       },
-      "homepage": "https://github.com/armor-code/armorcode-claude",
-      "repository": "https://github.com/armor-code/armorcode-claude",
+      "homepage": "https://github.com/armor-code/armorcode-skills",
+      "repository": "https://github.com/armor-code/armorcode-skills",
       "license": "Apache-2.0",
       "category": "security",
       "keywords": [

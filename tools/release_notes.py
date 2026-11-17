@@ -16,9 +16,15 @@ INSTALL = """
 **Claude Code** (terminal, IDE or the Desktop app's Code tab):
 
 ```
-/plugin marketplace add armor-code/armorcode-claude
+/plugin marketplace add armor-code/armorcode-skills
 /plugin install armorcode@armorcode
 ```
+
+**OpenAI Codex:** `codex plugin marketplace add armor-code/armorcode-skills`, then `codex plugin add armorcode@armorcode`.
+
+**GitHub Copilot CLI:** `copilot plugin marketplace add armor-code/armorcode-skills`, then `copilot plugin install armorcode@armorcode`.
+
+**Gemini CLI, Cursor, Windsurf, OpenCode and other Agent Skills clients:** `npx skills add armor-code/armorcode-skills`, or unzip `armorcode-api-skill-{v}.zip` into `~/.agents/skills/`.
 
 **Claude Desktop app, Cowork and chat:** download `armorcode-plugin-{v}.zip` below, then Customize > Plugins > Add > Upload plugin.
 

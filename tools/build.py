@@ -50,6 +50,9 @@ def validate():
     fm, body = frontmatter(text)
     if fm is None:
         return fail("SKILL.md has no frontmatter")
+    for key, val in fm.items():
+        if key != "metadata" and val and val[0] not in "\"'|>" and ": " in val:
+            errors += fail(f"frontmatter '{key}' contains ': ' in an unquoted value, which is invalid YAML")
     extra = set(fm) - ALLOWED_KEYS
     if extra:
         errors += fail(f"frontmatter keys outside the open spec: {sorted(extra)}")
@@ -83,11 +86,32 @@ def validate():
     plugin = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
     market = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text())
     json.loads((PLUGIN / "hooks" / "hooks.json").read_text())
-    versions = {plugin.get("version"), market["plugins"][0].get("version"),
+    # Agent Plugins 1.0 manifest (Codex, GitHub Copilot, VS Code and other conforming clients). Closed schema.
+    ap = json.loads((PLUGIN / "plugin.json").read_text())
+    ap_keys = {"$schema", "name", "version", "description", "author", "homepage", "repository", "license",
+               "keywords", "extensions"}
+    if ap.get("$schema") != "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json":
+        errors += fail("plugins/armorcode/plugin.json: $schema must be the Agent Plugins 1.0.0 identifier")
+    if set(ap) - ap_keys:
+        errors += fail(f"plugins/armorcode/plugin.json: fields outside the Agent Plugins schema: {sorted(set(ap) - ap_keys)}")
+    if not re.fullmatch(r"[a-z0-9](?:[a-z0-9]|[-.](?![-.]))*[a-z0-9]|[a-z0-9]", ap.get("name", "")) or \
+            ap.get("name") != plugin.get("name"):
+        errors += fail("plugins/armorcode/plugin.json: name must match the Claude manifest and the spec's name rules")
+    for k in ("description", "license", "repository", "homepage", "keywords"):
+        if ap.get(k) != plugin.get(k):
+            errors += fail(f"plugins/armorcode/plugin.json: '{k}' differs from .claude-plugin/plugin.json")
+    codex = json.loads((ROOT / ".agents" / "plugins" / "marketplace.json").read_text())
+    for entry in codex["plugins"]:
+        if not (ROOT / entry["source"]["path"]).is_dir():
+            errors += fail(f".agents/plugins/marketplace.json: {entry['source']['path']} does not exist")
+    for path in json.loads((ROOT / "skills.sh.json").read_text())["paths"]:
+        if not (ROOT / path / SKILL.name / "SKILL.md").exists():
+            errors += fail(f"skills.sh.json: {path} does not contain {SKILL.name}/SKILL.md")
+    versions = {plugin.get("version"), market["plugins"][0].get("version"), ap.get("version"),
                 re.search(r'version:\s*"?([\d.]+)', text).group(1),
                 re.search(r'VERSION = "([\d.]+)"', (SKILL / "scripts" / "ac.py").read_text()).group(1)}
     if len(versions) != 1:
-        errors += fail(f"version mismatch across plugin.json, marketplace.json, SKILL.md, ac.py: {versions}")
+        errors += fail(f"version mismatch across the plugin manifests, marketplace.json, SKILL.md, ac.py: {versions}")
     print(f"{'OK' if not errors else 'ERRORS'}  name={name} description={len(desc)} chars, "
           f"SKILL.md body={lines} lines, version={versions}")
     return errors

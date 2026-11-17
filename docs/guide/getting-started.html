@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>ArmorCode for Claude: Getting Started</title>
+<title>ArmorCode for AI Agents: Getting Started</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 :root{
@@ -12,7 +12,7 @@
   --mono:'JetBrains Mono',SFMono-Regular,Menlo,Consolas,monospace;
 }
 @page{size:Letter;margin:14mm 16mm 17mm 16mm;
-  @bottom-left{content:"© ArmorCode Inc. · ArmorCode for Claude 1.2.0 · Getting started";font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}
+  @bottom-left{content:"© ArmorCode Inc. · ArmorCode for AI agents 1.2.0 · Getting started";font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}
   @bottom-right{content:counter(page) " / " counter(pages);font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -75,15 +75,15 @@ tbody tr:nth-child(even){background:var(--pale)}
 <!-- ============ COVER ============ -->
 <div class="cover">
   <img src="assets/logo-white.png" alt="ArmorCode">
-  <h1>ArmorCode for Claude</h1>
+  <h1>ArmorCode for AI agents</h1>
   <p class="sub">Getting started with the <strong>armorcode-api</strong> skill and plugin</p>
-  <span class="badge">Version 1.2.0</span><span class="badge" style="background:#4C2DB6">Claude Code · Claude Desktop · claude.ai</span>
-  <p class="meta" style="margin-top:14px">Ask Claude to report on, organize and change your ArmorCode tenant in plain language. Claude shows you every change as a dry run first, and nothing changes until you approve it.</p>
+  <span class="badge">Version 1.2.0</span><span class="badge" style="background:#4C2DB6">Claude · Codex · Copilot · Cursor · Gemini · Grok</span>
+  <p class="meta" style="margin-top:14px">Ask your agent to report on, organize and change your ArmorCode tenant in plain language. The agent shows you every change as a dry run first, and nothing changes until you approve it.</p>
 </div>
 
 <div class="grid g3">
-  <div class="card"><div class="step">1</div><h4>Ask</h4><p>"How many open criticals are external-facing under Payments?" Claude reads your tenant and answers with the numbers and the query it used.</p></div>
-  <div class="card alt"><div class="step">2</div><h4>Review a plan</h4><p>For any change, Claude builds a dry run: tenant, risk level, exact diff, warnings. Nothing has changed yet.</p></div>
+  <div class="card"><div class="step">1</div><h4>Ask</h4><p>"How many open criticals are external-facing under Payments?" The agent reads your tenant and answers with the numbers and the query it used.</p></div>
+  <div class="card alt"><div class="step">2</div><h4>Review a plan</h4><p>For any change, the agent builds a dry run: tenant, risk level, exact diff, warnings. Nothing has changed yet.</p></div>
   <div class="card"><div class="step">3</div><h4>Approve and verify</h4><p>Only after you approve does it apply. It backs up what it touches, re-checks the result, and logs it.</p></div>
 </div>
 
@@ -105,10 +105,10 @@ tbody tr:nth-child(even){background:var(--pale)}
 <div class="section-head" style="margin-top:8px"><img src="assets/logo-icon.png" alt=""><span class="num">1</span><h2>Before you start</h2></div>
 <ul class="check">
   <li><strong>The Claude Desktop app</strong> (Code tab or Cowork) or <strong>Claude Code</strong> in a terminal or IDE. These run the plugin's approval prompt. Plain chat works with limits (see Install).</li>
-  <li><strong>Python 3.8 or later</strong> on the machine where Claude runs commands. macOS and most Linux systems already have it. On Windows, install it from python.org (tick <em>Add python.exe to PATH</em>) or with <code>winget install Python.Python.3.12</code>.</li>
+  <li><strong>Python 3.8 or later</strong> on the machine where the agent runs commands. macOS and most Linux systems already have it. On Windows, install it from python.org (tick <em>Add python.exe to PATH</em>) or with <code>winget install Python.Python.3.12</code>.</li>
   <li><strong>HTTPS access</strong> from that machine to your ArmorCode host: <code>app.armorcode.com</code>, <code>eu.armorcode.com</code>, or your private instance.</li>
   <li>An ArmorCode user whose role can create API keys (the <em>Create Tools</em> permission).</li>
-  <li>The plugin, from <strong>github.com/armor-code/armorcode-claude</strong> (see Install).</li>
+  <li>The plugin, from <strong>github.com/armor-code/armorcode-skills</strong> (see Install).</li>
 </ul>
 
 
@@ -116,16 +116,16 @@ tbody tr:nth-child(even){background:var(--pale)}
 <div class="page">
 <div class="section-head"><img src="assets/logo-icon.png" alt=""><span class="num">2</span><h2>Install</h2></div>
 
-<p style="margin-top:0">The plugin is published at <strong>github.com/armor-code/armorcode-claude</strong>. It contains the skill and an approval hook: where the hook runs, Claude asks you before any change is sent to ArmorCode, even if Claude decided it should go ahead.</p>
+<p style="margin-top:0">The plugin is published at <strong>github.com/armor-code/armorcode-skills</strong>. It contains the skill and an approval hook: where the hook runs, the agent asks you before any change is sent to ArmorCode, even if the agent decided it should go ahead.</p>
 
 <h3>Claude Desktop app: Code tab (and Claude Code in a terminal or IDE)</h3>
 <pre><span class="c"># In a Claude Code session (Desktop Code tab, terminal or IDE)</span>
-/plugin marketplace add armor-code/armorcode-claude
+/plugin marketplace add armor-code/armorcode-skills
 /plugin install armorcode@armorcode
 <span class="c">#    (in the Desktop Code tab you can also use + › Add plugins)</span>
 
 <span class="c"># or from a terminal</span>
-claude plugin marketplace add armor-code/armorcode-claude
+claude plugin marketplace add armor-code/armorcode-skills
 claude plugin install armorcode@armorcode</pre>
 <p class="muted">Start a new session afterwards. Updates come from GitHub (see Updating).</p>
 
@@ -143,13 +143,26 @@ claude plugin install armorcode@armorcode</pre>
 <h3>For everyone in your organization</h3>
 <p>A Claude organization admin can add it once under <strong>Organization settings › Plugins &amp; skills › Add › Upload plugin</strong>, and choose whether members can install it or get it by default.</p>
 
-<div class="note warn"><strong>Where the approval prompt runs.</strong> The hook runs in the Desktop Code tab, Cowork, and Claude Code in a terminal or IDE. It doesn't run in plain chat, where the plan-and-approve step and the CLI's own refusal to send unapproved changes are the safeguards. In chat on claude.ai, live calls also need your admin to allow network access to your ArmorCode host. Never paste an API key into a chat.</div>
+<h3>Other AI agents</h3>
+<pre><span class="c"># OpenAI Codex (CLI, app, IDE)</span>
+codex plugin marketplace add armor-code/armorcode-skills
+codex plugin add armorcode@armorcode
+
+<span class="c"># GitHub Copilot CLI</span>
+copilot plugin marketplace add armor-code/armorcode-skills
+copilot plugin install armorcode@armorcode
+
+<span class="c"># Gemini CLI, Cursor, Windsurf, OpenCode and 70+ other agents (needs Node.js)</span>
+npx skills add armor-code/armorcode-skills</pre>
+<p class="muted">Without Node.js, unzip <code>armorcode-api-skill-1.2.0.zip</code> from the Releases page into <code>~/.agents/skills/</code>, which Codex, Gemini CLI, Copilot and others read. In VS Code, use <strong>Chat: Install Plugin from Source</strong> with the repository URL.</p>
+
+<div class="note warn"><strong>Where the approval prompt runs.</strong> The hook runs in the Desktop Code tab, Cowork, and Claude Code in a terminal or IDE. In Codex it blocks key leaks, and approvals come from Codex's own approval mode. Other agents rely on the skill's plan-and-approve step. It doesn't run in plain chat, where the plan-and-approve step and the CLI's own refusal to send unapproved changes are the safeguards. In chat on claude.ai, live calls also need your admin to allow network access to your ArmorCode host. Never paste an API key into a chat.</div>
 
 <div class="section-head" style="margin-top:16px"><img src="assets/logo-icon.png" alt=""><span class="num">3</span><h2>Create and store your API key</h2></div>
 <ol>
   <li>In ArmorCode, go to <strong>Manage › Integrations › ArmorCode API › Create New Key</strong>.</li>
   <li>Choose key type <strong>API</strong>. Start with a <strong>read-only role</strong>, scope the key to the <strong>hierarchy or groups</strong> you need, and set an <strong>expiry</strong>.</li>
-  <li>Copy the key once, straight into one of these. <strong>Never paste it into Claude.</strong></li>
+  <li>Copy the key once, straight into one of these. <strong>Never paste it into a chat.</strong></li>
 </ol>
 <div class="grid g2">
   <div class="card"><h4>macOS Keychain (recommended on a Mac)</h4>
@@ -162,8 +175,8 @@ export ARMORCODE_TOKEN="…"
 <span class="c"># then open a new terminal</span></pre></div>
 </div>
 <div class="card" style="margin-top:8px"><h4>Windows</h4>
-Start menu › <strong>Edit environment variables for your account</strong> › User variables › <strong>New</strong>: name <code>ARMORCODE_TOKEN</code>, value: the key. Then quit and reopen Claude so it picks the variable up.</div>
-<p class="muted" style="margin-top:8px">Claude reads the key only by the name of the variable or Keychain item; it never sees or prints the value. If a key is ever pasted into a chat, revoke it under Manage › Integrations and create a new one.</p>
+Start menu › <strong>Edit environment variables for your account</strong> › User variables › <strong>New</strong>: name <code>ARMORCODE_TOKEN</code>, value: the key. Then quit and reopen your AI app so it picks the variable up.</div>
+<p class="muted" style="margin-top:8px">The agent reads the key only by the name of the variable or Keychain item; it never sees or prints the value. If a key is ever pasted into a chat, revoke it under Manage › Integrations and create a new one.</p>
 
 </div>
 
@@ -173,7 +186,7 @@ Start menu › <strong>Edit environment variables for your account</strong> › 
 <p>Start a new Claude Code session and say:</p>
 <div class="note"><span class="prompt">"Set up the ArmorCode skill for our tenant. The API key is in the Keychain item <code>armorcode-prod</code>."</span><br>
 <span class="muted">(or: "…in the environment variable <code>ARMORCODE_TOKEN</code>")</span></div>
-<p>Claude creates a <strong>read-only profile</strong>, checks connectivity, and tells you the tenant, organizations and mode. For example:</p>
+<p>The agent creates a <strong>read-only profile</strong>, checks connectivity, and tells you the tenant, organizations and mode. For example:</p>
 <pre>Connected to https://app.armorcode.com as profile 'prod' (read-only · PRODUCTION)
 Organizations (business units): Acme [1234], Archive [1235]
 Groups visible to this key, all organizations: 412
@@ -186,7 +199,7 @@ This profile is read-only: plans can be built and reviewed, but `apply` is refus
   <thead><tr><th style="width:22%">Area</th><th>Try asking</th></tr></thead>
   <tbody>
     <tr><td><strong>Reporting</strong></td><td><span class="prompt">"Open critical and high findings by group under the Payments hierarchy, top 10."</span><br><span class="prompt">"Export open findings for group X to CSV with severity, CVE, component and SLA due date."</span></td></tr>
-    <tr><td><strong>AQL</strong></td><td><span class="prompt">"Write and check an AQL query for external-facing findings with a known-exploited CVE."</span> (Claude validates it against your tenant and gives you the count.)</td></tr>
+    <tr><td><strong>AQL</strong></td><td><span class="prompt">"Write and check an AQL query for external-facing findings with a known-exploited CVE."</span> (The agent validates it against your tenant and gives you the count.)</td></tr>
     <tr><td><strong>Org hierarchy</strong></td><td><span class="prompt">"Show our hierarchy three levels deep and lint it for problems."</span><br><span class="prompt">"Export our hierarchy to a file I can keep in git."</span> Then: <span class="prompt">"Add a 'Data Platform' branch with these groups and subgroups, and show me the plan."</span></td></tr>
     <tr><td><strong>Groups and subgroups</strong></td><td><span class="prompt">"Set group 'checkout-api' to tier 1 with the tier's risk tags."</span><br><span class="prompt">"Move these three subgroups under the 'Payments Platform' group."</span></td></tr>
     <tr><td><strong>Repositories</strong></td><td><span class="prompt">"List unmapped GitHub repos and map the ones starting with 'payments-' to subgroups with the same name."</span></td></tr>
@@ -196,16 +209,16 @@ This profile is read-only: plans can be built and reviewed, but `apply` is refus
     <tr><td><strong>Integrations</strong></td><td><span class="prompt">"Upload this scan file as Checkmarx One into subgroup Y."</span> · <span class="prompt">"What did the last 20 scans ingest?"</span></td></tr>
   </tbody>
 </table>
-<p class="muted">Tip: ask for counts and pilots. Claude counts what a change would touch before planning it, and can run it on a small slice first.</p>
+<p class="muted">Tip: ask for counts and pilots. The agent counts what a change would touch before planning it, and can run it on a small slice first.</p>
 
 </div>
 
 <!-- ============ HOW CHANGES WORK ============ -->
 <div class="page">
 <div class="section-head"><img src="assets/logo-icon.png" alt=""><span class="num">6</span><h2>How changes work</h2></div>
-<p>Every change follows the same four steps. Claude can't skip them: the bundled CLI refuses to send any change outside an approved plan, and a plan that was edited after you reviewed it won't run.</p>
+<p>Every change follows the same four steps. The agent can't skip them: the bundled CLI refuses to send any change outside an approved plan, and a plan that was edited after you reviewed it won't run.</p>
 <div class="grid g2">
-  <div class="card"><div class="step">1</div><h4>Read</h4><p>Claude reads the current state and counts what your request would touch. If the request doesn't match reality (for example the rule matches nothing, or far more than expected), it stops and asks.</p></div>
+  <div class="card"><div class="step">1</div><h4>Read</h4><p>The agent reads the current state and counts what your request would touch. If the request doesn't match reality (for example the rule matches nothing, or far more than expected), it stops and asks.</p></div>
   <div class="card alt"><div class="step">2</div><h4>Plan (dry run)</h4><p>It builds a plan and shows you the tenant, risk level, exact diff and warnings, then asks a direct question such as "Apply this to PRODUCTION?"</p></div>
   <div class="card alt"><div class="step">3</div><h4>Approve</h4><p>Only your explicit yes moves it forward. In Claude Code the plugin also shows its own approval prompt with the plan's steps. That's expected.</p></div>
   <div class="card"><div class="step">4</div><h4>Apply and verify</h4><p>It backs up each object, applies the change, waits for ArmorCode's background jobs, re-reads the result and reports what was verified, including any failures.</p></div>
@@ -229,20 +242,20 @@ Apply     ac.py apply p-20261023-173030-49b7 --confirm f41f57</pre>
   <tbody>
     <tr><td><strong>MEDIUM</strong></td><td>Creates or updates configuration such as a group, subgroup or saved view.</td></tr>
     <tr><td><strong>HIGH</strong></td><td>Bulk finding changes, moves, uploads (which replace a tool's results), access changes, runbooks, and anything not on the low-risk list. Read it carefully.</td></tr>
-    <tr><td><strong>CRITICAL</strong></td><td>Permanent deletes and data purges. These need an extra, explicit flag, and Claude asks you specifically about the permanent part.</td></tr>
+    <tr><td><strong>CRITICAL</strong></td><td>Permanent deletes and data purges. These need an extra, explicit flag, and the agent asks you specifically about the permanent part.</td></tr>
   </tbody>
 </table>
-<div class="note"><strong>Built-in limits.</strong> Bulk finding changes are capped at 1,000 findings unless you explicitly ask for more. Claude refuses filters the API would silently ignore, and refuses settings that would quietly apply to future findings (standing rules, runbook back-fills) unless you ask for them by name.</div>
+<div class="note"><strong>Built-in limits.</strong> Bulk finding changes are capped at 1,000 findings unless you explicitly ask for more. The agent refuses filters the API would silently ignore, and refuses settings that would quietly apply to future findings (standing rules, runbook back-fills) unless you ask for them by name.</div>
 
 <div class="section-head" style="margin-top:14px"><img src="assets/logo-icon.png" alt=""><span class="num">7</span><h2>Undo, backups and audit</h2></div>
 <table>
-  <thead><tr><th style="width:30%">If you need to…</th><th>Ask Claude, or know that…</th></tr></thead>
+  <thead><tr><th style="width:30%">If you need to…</th><th>Ask your agent, or know that…</th></tr></thead>
   <tbody>
     <tr><td>Undo a group or subgroup change</td><td><span class="prompt">"Restore group X from the backup taken before the last change."</span> Backups live in <code>~/.armorcode/backups</code>.</td></tr>
     <tr><td>Undo a bulk finding change</td><td><span class="prompt">"Revert plan p-…"</span>. Prior status and severity are stored in every findings plan; only findings still holding the new value are reverted.</td></tr>
     <tr><td>Undo a repository mapping</td><td>The plan file records each repo's previous mapping.</td></tr>
     <tr><td>See what was changed</td><td><span class="prompt">"Show the ArmorCode audit log for this machine."</span> Every applied step is logged in <code>~/.armorcode/audit.jsonl</code>, and ArmorCode's own audit log records it under your user.</td></tr>
-    <tr><td>Undo a permanent delete, purge or runbook action</td><td>Not possible. Claude says so before asking you to approve one.</td></tr>
+    <tr><td>Undo a permanent delete, purge or runbook action</td><td>Not possible. The agent says so before asking you to approve one.</td></tr>
   </tbody>
 </table>
 
@@ -251,7 +264,7 @@ Apply     ac.py apply p-20261023-173030-49b7 --confirm f41f57</pre>
 <!-- ============ YOUR CALL + DATA + TROUBLESHOOTING ============ -->
 <div class="page">
 <div class="section-head"><img src="assets/logo-icon.png" alt=""><span class="num">8</span><h2>Using it is your call</h2></div>
-<p>The guardrails reduce the risk of mistakes; they don't eliminate it. Claude can misread a request, and APIs change. <strong>You decide</strong> whether to use the skill, which tenants and keys to use it with, and whether to approve each change. Changes made through it are made with your API key and count as your changes.</p>
+<p>The guardrails reduce the risk of mistakes; they don't eliminate it. The agent can misread a request, and APIs change. <strong>You decide</strong> whether to use the skill, which tenants and keys to use it with, and whether to approve each change. Changes made through it are made with your API key and count as your changes.</p>
 <div class="grid g2">
   <div class="card"><h4>Start read-only</h4><p>Reporting, exports, AQL checks and planning never change anything. Get comfortable there first.</p></div>
   <div class="card alt"><h4>Try changes somewhere safe first</h4><p>Use a non-production tenant or organization before using a change-capable key elsewhere.</p></div>
@@ -262,9 +275,9 @@ Apply     ac.py apply p-20261023-173030-49b7 --confirm f41f57</pre>
 <div class="section-head" style="margin-top:16px"><img src="assets/logo-icon.png" alt=""><span class="num">9</span><h2>Data handling</h2></div>
 <ul>
   <li>The bundled CLI runs on your machine and calls <strong>your</strong> ArmorCode host directly. The API key is never sent anywhere else and never follows a redirect.</li>
-  <li>API responses that Claude reads enter its context, and are handled under your organization's agreement and data settings with Anthropic. Scoped keys and file exports (<code>--out</code>) limit what Claude sees.</li>
+  <li>API responses that the agent reads enter the model's context, and are handled under your organization's agreement and data settings with your AI provider. Scoped keys and file exports (<code>--out</code>) limit what the agent sees.</li>
   <li>Local state lives in <code>~/.armorcode/</code> with owner-only permissions: profiles (no keys), plans, backups and the audit log. You can delete it at any time.</li>
-  <li>Claude is instructed to treat finding text, tags and comments as untrusted data, never as instructions.</li>
+  <li>The agent is instructed to treat finding text, tags and comments as untrusted data, never as instructions.</li>
 </ul>
 
 <div class="section-head" style="margin-top:16px"><img src="assets/logo-icon.png" alt=""><span class="num">10</span><h2>Troubleshooting</h2></div>
@@ -275,7 +288,7 @@ Apply     ac.py apply p-20261023-173030-49b7 --confirm f41f57</pre>
     <tr><td>HTTP 401</td><td>The key is wrong, expired, revoked, or for another tenant. Create a new one and check the host.</td></tr>
     <tr><td>HTTP 403</td><td>The key's role or scope doesn't allow that call, or it isn't an <em>API</em>-type key.</td></tr>
     <tr><td><code>REFUSED: …</code></td><td>A guardrail stopped something on purpose: a read-only profile, a filter typo, a count over the cap, a plan edited after review. The message says what to do.</td></tr>
-    <tr><td>Counts differ from the UI</td><td>Ask Claude to reconcile them. Usual causes are status definitions, environment filters, organization scope, or a minute of indexing delay after big changes.</td></tr>
+    <tr><td>Counts differ from the UI</td><td>Ask your agent to reconcile them. Usual causes are status definitions, environment filters, organization scope, or a minute of indexing delay after big changes.</td></tr>
     <tr><td>The skill doesn't appear</td><td>Desktop app: check <strong>Customize › Plugins</strong>. Claude Code: run <code>/plugin</code> (or <code>claude plugin list</code>); it should show <code>armorcode@armorcode</code> enabled. Start a new session after installing.</td></tr>
     <tr><td>Network or proxy errors</td><td>The machine must reach your ArmorCode host over HTTPS. Behind a proxy, set <code>HTTPS_PROXY</code>.</td></tr>
   </tbody>
@@ -292,7 +305,7 @@ claude plugin uninstall armorcode@armorcode
 claude plugin marketplace remove armorcode
 <span class="c"># optional: delete local profiles, plans, backups and the audit log</span>
 rm -r ~/.armorcode</pre>
-<p class="muted">Questions or unexpected behavior: open an issue at github.com/armor-code/armorcode-claude or contact your ArmorCode team, with what you asked, the plan id and the time. Never include an API key or tenant data.</p>
+<p class="muted">Questions or unexpected behavior: open an issue at github.com/armor-code/armorcode-skills or contact your ArmorCode team, with what you asked, the plan id and the time. Never include an API key or tenant data.</p>
 
 </div>
 

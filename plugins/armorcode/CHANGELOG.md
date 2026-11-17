@@ -2,6 +2,22 @@
 
 ## 1.2.0 — 2026-11-16
 
+Works in any AI agent, not just Claude, and adds API behavior verified live on ArmorCode tenants. The repository is now **armor-code/armorcode-skills** (the old armorcode-claude URLs redirect).
+
+### Any AI agent
+
+- **Installs in OpenAI Codex, GitHub Copilot, Gemini CLI, Cursor and 70+ other agents**, not just Claude:
+  - An [Agent Plugins 1.0](https://agent-plugins.org) manifest (`plugins/armorcode/plugin.json`) for Codex, GitHub Copilot, VS Code and other conforming clients.
+  - A Codex marketplace (`.agents/plugins/marketplace.json`): `codex plugin marketplace add armor-code/armorcode-skills`.
+  - GitHub Copilot CLI and Grok Build read the existing Claude-format marketplace.
+  - `npx skills add armor-code/armorcode-skills` installs the skill for any other Agent Skills client. The skill zip also unzips into `~/.agents/skills/`.
+  - Tested with Claude Code, Codex CLI, Copilot CLI, Gemini CLI and the `skills` installer. CI repeats those installs on every change.
+- **The approval hook in Codex:** it blocks key exposure and edits to `~/.armorcode`, including Codex's `apply_patch` edits. Codex doesn't support hook approval prompts yet, so approvals there come from Codex's approval mode and the skill's plan-and-approve step.
+- **The skill and docs no longer assume Claude.** The setup reference has a per-agent table, and chat apps are pointed to ArmorCode's hosted MCP server for live data.
+- `tools/build.py` also validates the Agent Plugins manifest, the Codex marketplace and `skills.sh.json`, keeps every manifest's version in sync, and catches unquoted `: ` in SKILL.md frontmatter (which silently drops the skill's metadata).
+
+### API learnings
+
 API behavior verified live on ArmorCode tenants, and checked against ArmorCode's code and published API reference.
 
 - **SLA policies** (`governance.md` §3, rewritten):
@@ -47,6 +63,7 @@ API behavior verified live on ArmorCode tenants, and checked against ArmorCode's
   - Organization renames are UI-only.
   - Group owners read back with email and name.
 - **Endpoint catalog:** new rows for SLA, dashboard, risk trend and ticket-template endpoints. Every label was re-checked against the published API reference; endpoints not in it are marked Internal (may change without notice).
+
 
 ## 1.1.0 — 2026-11-16
 
