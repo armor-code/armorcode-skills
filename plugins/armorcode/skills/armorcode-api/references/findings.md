@@ -96,7 +96,15 @@ Use `ac.py plan findings-update --aql "…" | --ids … --status S | --severity 
 API facts:
 - `notes` is required ("Note cannot be left blank") and is stored as the reason. `findingFilterRequest` is required even when ids are given.
 - Each target status needs its own permission (`MARK_MITIGATED`, `MARK_ACCEPT_RISK` and so on). A key without it gets the job's failure or a 403.
-- **Accept Risk**: the API allows `ACCEPTRISK` directly with `unsupressAfterDuration` (epoch **seconds**, in the future) or `slaDueDate`. `ac.py` deliberately routes risk acceptance through **exceptions** (`governance.md`), which record an owner, reason, approver and expiry. Raise this with the user rather than working around it.
+- **Accept Risk**: the API allows `ACCEPTRISK` directly, with a resurface date. `ac.py` deliberately routes risk acceptance through **exceptions** (`governance.md`), which record an owner, reason, approver and expiry. Raise this with the user rather than working around it. If they still want the direct route, the body is:
+  ```json
+  {"status": "ACCEPTRISK", "reason": "Compensating Control", "notes": "WAF rule blocks the vector; revisit after the Q1 patch window.",
+   "unsupressAfterDuration": 1798761600, "multiActionTagUpdates": [],
+   "findingFilterRequest": {"filters": {"id_term": [123456789, 123456790]}}}
+  ```
+  - `unsupressAfterDuration` (one "p") is the date the findings resurface, as an epoch timestamp in **seconds**, not a duration. A past value returns 400 "should be in future". Either it or `slaDueDate` is required.
+  - ⚠ A millisecond timestamp also passes that check, because as seconds it lies tens of thousands of years ahead, so the findings never resurface. Compute seconds (`int(dt.timestamp())`) and read the finding back.
+- `PUT /api/findings/bulk` isn't supported; use `change-basic-details`.
 - **`rulesOnFutureFindingsEnabled: true` creates a persistent rule** that applies the same change to future matching findings. Never set it unless the user explicitly wants a standing rule, and tell them how to find and remove it in the UI.
 - Other fields on the same endpoint: `ownerV2:{value}`, `slaDueDate`, `category`, `multiActionTagUpdates`, `createTicket`, `developer` (ignored for scanner findings; developer comes from the scanner or SCM blame), `skipOwnerChangeEmail`.
 - **Timing.** Changes are visible via `GET /user/findings/{id}` within seconds. Search results and counts can lag up to a minute.
@@ -137,6 +145,14 @@ Tags are stored lowercase and need `UPDATE_FINDING_TAGS`.
 - Raw filters: `correlatedFindingExits: [true]`, `uniqueCorrelatedFindingExits: [true]` (JSON booleans), `correlationIds: [id]`.
 - Manual correlation: `plan raw POST /user/findings/correlated --body '{"findingId":N,"correlatedFindingIds":"M","note":"…","correlationName":"…"}'` (one id per call).
 - "Unique" counts (`isUnique = true`) are the de-duplicated workload. Use them for "how many things do we actually need to fix".
+- Infrastructure correlation groups have remediation groups that start with `HostName:` (`remediationGroup LIKE 'HostName:%'`). For container image findings the "host name" can be the image reference.
+
+**Inventory what correlation found** (read-only):
+1. `ac.py findings list --aql "isCorrelated = true" --fields id,source,scanType,correlationMetadata --out correlated.json`.
+2. Group the rows by `correlationMetadata[].correlationId`. For each group, record its set of `source` and `scanType` values and its `correlationName`.
+3. Summarize by the source/scan-type combination (for example SCA + container, SAST + DAST, two infrastructure scanners on one host), with counts and a few correlation ids per type. Those ids make good saved views (`correlationId IN (…)`).
+
+**`source` and `scanType` can come back as lists** in raw findings JSON, not strings. Normalize them (sort and join) before using them as keys in your own code. `ac.py`'s CSV output already joins lists with `;`.
 
 ## 9. Recipes
 

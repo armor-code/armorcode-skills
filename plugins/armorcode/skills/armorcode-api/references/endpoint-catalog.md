@@ -2,7 +2,7 @@
 
 The endpoints this skill uses, with how to call them safely. **R** reads; **W** writes and must go through `ac.py plan` → approval → `apply`.
 
-**Stability**: *Public* means it is in ArmorCode's published API reference (checked against a tenant's `/v3/api-docs/ArmorCode`). *Internal* means the ArmorCode web app uses it and it was verified, but it may change without notice. Prefer Public endpoints, and run `ac.py spec search <term>` to see what your tenant publishes today. For anything not listed here, check the spec first.
+**Stability**: *Public* means it is in ArmorCode's published API reference (checked against a tenant's `/v3/api-docs/ArmorCode`; labels last checked 2026-11-16). *Internal* means the ArmorCode web app uses it and it was verified, but it isn't in the published reference and **may change without notice**. Prefer Public endpoints, and run `ac.py spec search <term>` to see what your tenant publishes today. For anything not listed here, check the spec first.
 
 Paths are relative to your base URL. Names in parentheses are the role permission a call needs; Account Admin keys bypass these checks.
 
@@ -74,7 +74,7 @@ Paths are relative to your base URL. Names in parentheses are the role permissio
 | POST | `/user/findings/findingStats/all` | R | Public | Counts; aggField/secAggField; Reported = total |
 | POST | `/user/findings/findings-filters` | R | Public | Distinct values of fields |
 | POST | `/user/findings/stat/product` | R | Public | Per-group stats |
-| PUT | `/user/findings/v2/bulk/change-basic-details` | W | Public | Bulk status/severity/owner/due date/move; async job (per-status permissions) |
+| PUT | `/user/findings/v2/bulk/change-basic-details` | W | Public | Bulk status/severity/owner/due date/move; async job (per-status permissions). ACCEPTRISK: `unsupressAfterDuration` in epoch seconds. (`PUT /api/findings/bulk` isn't supported) |
 | GET | `/api/v2/jobs/{referenceId}` | R | Public | Async job status: ACCEPTED/PROCESSING/COMPLETED/FAILED |
 | POST | `/api/v2/findings/tags/bulk` | W | Public | Per-finding tags; upsert by key; ≤10,000 entries; async |
 | PUT | `/user/findings/findingTags` | W | Public | Same tags on many findings (UPDATE_FINDING_TAGS) |
@@ -114,13 +114,17 @@ Paths are relative to your base URL. Names in parentheses are the role permissio
 | DELETE | `/api/v2/saved-search/bulk` | W | Public | Delete ≤100 views |
 | GET | `/api/custom-dashboard` | R | Internal | Dashboards |
 | POST | `/api/custom-dashboard` | W | Internal | Create dashboard (widgetConfigJsonNode list) |
+| PUT | `/api/custom-dashboard/{id}` | W | Internal | Update whole dashboard; system dashboards return 400 |
+| GET | `/api/risk-stats/bu-trend` | R | Internal | Risk trend data behind RISK_SCORE_TREND (aggregateBy Day/Week) |
 | DELETE | `/api/custom-dashboard/{id}` | W | Internal | Delete dashboard |
 | POST | `/api/audit-log/search` | R | Public | Tenant audit log |
 | GET | `/user/audit/log/details/page` | R | Public | Deprecated audit log |
 | POST | `/api/alerts` | R | Public | Alerts |
 | PUT | `/api/alerts/A-{id}` | W | Public | Update alert |
-| GET | `/api/sla/template` | R | Internal | SLA templates (SLA v2; days) |
-| GET | `/api/sla/config` | R | Internal | Legacy SLA configuration |
+| GET | `/api/sla/template` | R | Internal | SLA policies, tenant default included; durations in ms |
+| POST | `/api/sla/template` | W | Internal | Create SLA policy |
+| POST | `/api/sla/template/{id}/recalculate` | W | Internal | Save & Apply: new template id; existing findings update at the next daily run |
+| GET | `/api/sla/config` | R | Internal | Legacy SLA configuration (returned `[]`; don't use for policies) |
 | GET | `/api/assessments` | R | Public | Pentests/assessments |
 | POST | `/api/assessments` | W | Public | Create assessment (forced INPROGRESS) |
 | PUT | `/api/assessments/{id}` | W | Public | Update assessment |
@@ -150,11 +154,13 @@ Paths are relative to your base URL. Names in parentheses are the role permissio
 | GET | `/user/tickets/jira/configuration/list` | R | Public | Ticket mappings (all trackers) |
 | GET | `/user/tickets/jira/configuration/login/{ticketSystem}` | R | Public | Tracker logins |
 | POST | `/user/tickets/jira/configuration` | W | Public | Create ticket mapping (one per group across trackers) |
-| PUT | `/user/tickets/jira/configuration/{id}` | W | Public | Update ticket mapping |
+| PUT | `/user/tickets/jira/configuration/{id}` | W | Public | Update ticket mapping; `"webhook": true` turns on Jira two-way sync |
 | GET | `/api/v2/tickets/ticketUnifiedTemplates` | R | Internal | Ticket templates |
-| POST | `/api/v2/tickets/ticketUnifiedTemplate` | W | Internal | Create template (include businessUnitId) |
+| POST | `/api/v2/tickets/ticketUnifiedTemplate` | W | Internal | Create template, SINGLE or MULTI (include businessUnitId) |
+| PUT | `/api/v2/tickets/ticketUnifiedTemplate/{id}` | W | Internal | Update template (full body; the id is required) |
+| GET | `/api/v2/tickets/unified-template-variables` | R | Internal | Template variables (?type=SINGLE\|MULTI&section=…) |
 | POST | `/user/tickets/jira/bulk` | W | Internal | One ticket per finding |
-| POST | `/user/tickets/jira/single` | W | Internal | One ticket for many findings |
+| POST | `/user/tickets/jira/single` | W | Internal | One ticket for many findings (≤50; MULTI template) |
 | POST | `/api/ticket` | R | Public | Search tickets (fromDate+toDate required) |
 | PATCH | `/api/ticket/{id}` | W | Public | Update ticket |
 | POST | `/api/v2/assets` | R | Internal | Search assets (≤100/page) |

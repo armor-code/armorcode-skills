@@ -44,6 +44,9 @@
 | `no findings are associated` (exception submit) | In-scope findings still attaching | Wait 1–2 minutes, then submit |
 | `Name already exists` | Group or subgroup name taken (unique per organization / per group) | Choose another name, or update the existing one |
 | `Role name should not start or end with…` | Role-name rules | Letters, digits, space, `_`, `-` only |
+| `unsuppressAfterDuration should be in future` | Accept Risk resurface date in the past, or sent as a duration | An epoch timestamp in **seconds** (`findings.md` §5) |
+| `not found/accessible` (dashboard PUT) | A system dashboard (`createdBy: "system"`) | Duplicate it and edit the copy |
+| Ticket template "not supported" / "already exists" | Template update sent without the id, or as a POST | `PUT /api/v2/tickets/ticketUnifiedTemplate/{id}` |
 
 ## 3. Success responses that didn't do what you think
 
@@ -65,6 +68,13 @@ All of these have happened. `ac.py` guards against most of them; know them when 
 | Dashboard created but empty and un-editable | `widgetConfig` sent as a string | Send `widgetConfigJsonNode` (list) |
 | Deleting a tool mapping removed its findings | `deleteAllData` defaults to true | `ac.py` requires an explicit value |
 | A bulk change keeps being re-applied to new findings | `rulesOnFutureFindingsEnabled: true` created a standing rule | Never set it unless intended |
+| An upload produced far more findings than the file has distinct issues | Two uploads of the same tool + subgroup were processed at the same time and didn't deduplicate | One upload at a time per tool + subgroup; `apply` waits for the previous one |
+| Many rows came back as `localDuplicateFindings` | The tool's dedup key ignores a field that distinguishes your rows (e.g. Prisma Cloud Compute images without `Hostname`) | `integrations.md` §3 |
+| Accepted-risk findings never resurface | `unsupressAfterDuration` sent in milliseconds | Send epoch seconds |
+| SLA policy saved, but due dates unchanged | Recalculate is queued (`pendingSaveAndApply`) for the next daily run | Re-check the next day; re-read the policy id, which changed |
+| Risk trend widget shows "Nothing matches your search" | `aggregateBy` unset defaults to Week, and there is less than a week of snapshots | Set `config.aggregateBy: "Day"` |
+| Widgets grouped by team are empty | Groups have no assigned team (`teamDto`) | `plan group-update ID --team-id T` |
+| `/api/sla/config` returns `[]` | Legacy endpoint | `/api/sla/template` |
 
 ## 4. Timing: async work and index lag
 
@@ -76,6 +86,9 @@ All of these have happened. `ac.py` guards against most of them; know them when 
 | Scan upload | Seconds to many minutes (processed in order) | `ac.py scans --file NAME` |
 | Exception scope attachment | 1–2 minutes | Exception detail |
 | AI correlation | Nightly | Next day |
+| SLA policy Save & Apply (recalculate) | Next daily recalculation | Due dates on a sample of findings |
+| Risk trend data | Daily snapshots | Empty for about the first day |
+| Grouped ticket id on findings | ~25 s | The finding's `armorcodeTicket` |
 | Tool mapping delete | Async ("submitted") | Re-list mappings |
 
 Don't conclude failure from an early re-read, and don't stack bulk changes on the same findings before the previous one settles.

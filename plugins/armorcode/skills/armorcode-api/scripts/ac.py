@@ -32,7 +32,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 IS_WINDOWS = os.name == "nt"
 DEFAULT_BASE_URL = "https://app.armorcode.com"
 HOME = Path(os.environ.get("ARMORCODE_HOME") or (Path.home() / ".armorcode")).expanduser()
@@ -1031,6 +1031,33 @@ def exec_findings_bulk(c, step):
     return ok, msg, None
 
 
+SCAN_DONE = ("COMPLETED", "FAILED", "PASSED", "ERROR")
+
+
+def scans_in_flight(rows, tool, subgroup_id):
+    """Scans of `tool` on `subgroup_id` that the server hasn't finished processing yet.
+    Two uploads of one tool + subgroup processed at the same time don't deduplicate against each other."""
+    out = []
+    for s in rows or []:
+        name = str(s.get("tool") or s.get("toolName") or "")
+        sub = dig(s, "subproduct.id") or dig(s, "subProduct.id") or s.get("subProductId")
+        st = str(s.get("scanStatus") or s.get("status") or "").upper()
+        if name.lower() == str(tool).lower() and str(sub) == str(subgroup_id) and st and st not in SCAN_DONE:
+            out.append({"id": s.get("id"), "fileName": s.get("fileName"), "status": st})
+    return out
+
+
+def recent_scans(c, pages=2):
+    q = urllib.parse.quote(json.dumps({}))
+    rows = []
+    for pg in range(pages):
+        page = c.get(f"/api/scans?scanReportReqDto={q}&page={pg}&size=100&sort=createdAt,desc") or {}
+        rows += page.get("content") or []
+        if page.get("last", True):
+            break
+    return rows
+
+
 def exec_upload(c, step):
     path = Path(step["file"])
     if not path.exists():
@@ -1039,6 +1066,17 @@ def exec_upload(c, step):
     if digest != step["sha256"]:
         return False, "file changed since the plan was made; re-plan", None
     tool = step["tool"]
+    # Wait for earlier uploads of this tool to this subgroup: concurrent ones create duplicates instead of deduplicating.
+    busy, deadline = [], time.time() + step.get("wait_seconds", 600)
+    while True:
+        busy = scans_in_flight(recent_scans(c), tool, step["subgroup_id"])
+        if not busy or time.time() >= deadline:
+            break
+        time.sleep(15)
+    if busy:
+        return False, (f"{len(busy)} earlier '{tool}' upload(s) to this subgroup are still processing "
+                       f"({busy[:3]}). Nothing was sent. Re-run apply once `ac.py scans --tool \"{tool}\"` shows "
+                       "them COMPLETED or FAILED."), None
     sd = step.get("scan_date") or (now_utc() - dt.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S+00:00")
     body = {"product": int(step["group_id"]), "subProduct": int(step["subgroup_id"]), "scanDate": sd, "fileName": step["upload_name"], "environment": step["environment"],
             "uploadTimezone": "UTC"}
@@ -1687,6 +1725,14 @@ def plan_group_update(c, args):
         patch["type_id"] = args.type_id
     if args.team_id:
         patch["team_id"] = args.team_id
+    if args.sla_template_id:
+        patch["set"]["slaTemplateId"] = int(args.sla_template_id)
+        known = sla_template_ids(c)
+        if known is None:
+            warnings.append("Couldn't list SLA policies (GET /api/sla/template) to check this id; check it yourself.")
+        elif str(args.sla_template_id) not in known:
+            raise Refused(f"SLA policy {args.sla_template_id} not found. Policies: {known}. Ids change after a "
+                          "Save & Apply (recalculate), so re-read them.")
     owners = {}
     for o in args.owner or []:
         slot, uid = o.split("=", 1)
@@ -1715,6 +1761,16 @@ def plan_group_update(c, args):
             "summary": f"Update group '{g.get('name')}' ({args.id})"}
     risk = "HIGH" if args.hierarchy is not None else "MEDIUM"
     return new_plan(c, f"Update group '{g.get('name')}' ({args.id})", [step], risk, reasons, warnings)
+
+
+def sla_template_ids(c):
+    """{id: name} of the tenant's SLA policies, or None if they can't be read."""
+    try:
+        d = c.get("/api/sla/template")
+    except Exception:  # noqa: BLE001 - Internal endpoint; absence is reported, not fatal
+        return None
+    rows = d if isinstance(d, list) else (d or {}).get("content") or (d or {}).get("data") or []
+    return {str(r.get("id")): r.get("name") for r in rows if isinstance(r, dict) and r.get("id") is not None}
 
 
 def plan_group_create(c, args):
@@ -2058,6 +2114,11 @@ def plan_scan_upload(c, args):
                         "tool's findings appear under another name, the count above understates what gets closed.")
     if args.scan_date:
         warnings.append("scanDate must not be in the future (UTC) or the upload is rejected.")
+    busy = scans_in_flight(recent_scans(c), args.tool, args.subgroup)
+    if busy:
+        warnings.append(f"{len(busy)} earlier '{args.tool}' upload(s) to this subgroup are still processing. Uploads "
+                        "of one tool + subgroup processed at the same time don't deduplicate, so apply waits for "
+                        "them to finish first (up to 10 min) and stops without sending if they don't.")
     return new_plan(c, step["summary"], [step], "HIGH", ["uploads a scan"], warnings)
 
 
@@ -2520,6 +2581,7 @@ AQL returns every status unless it restricts status; plain --filters skip MITIGA
     x.add_argument("--hierarchy", action="append", help="hierarchy path(s); replaces all armorcode.group tags")
     x.add_argument("--type-id")
     x.add_argument("--team-id")
+    x.add_argument("--sla-template-id", help="assign an SLA policy (id from GET /api/sla/template)")
     x.add_argument("--owner", action="append", help="slot=userId, e.g. securityOwner=123")
     x.add_argument("--artifact", action="append", help="name=https://link")
     x = ps.add_parser("group-create")

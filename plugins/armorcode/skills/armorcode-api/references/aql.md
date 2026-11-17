@@ -26,6 +26,10 @@ AQL (ArmorCode Query Language) v2 is what the Findings page, dashboards, saved v
 | Status | `status IN ('OPEN','CONFIRMED')` or `(Open, Confirmed)` | UI words such as `'Remediated'` (rejected; use `MITIGATED`) |
 | Severity | `severity IN (Critical, High)` or `'CRITICAL'` | |
 | Correlation | `isCorrelated = true`, `isUnique = true`, `remediationGroup LIKE '%…%'`, `correlationId IN (…)` (works, but undocumented) | |
+| A group's tier | `groupTier = '1'` (the tier id) | `tier` |
+| SLA due dates | `slaDueDate < 'now()'` (breached), `slaDueDate BETWEEN 'now()' AND 'now() + 7d'` (due within a week) | `dueDate`, `dueOn`, `resolutionDueDate`, `slaStatus` |
+| CVSS | `baseScore >= 9`, `CVSSVector LIKE 'CVSS:3%'` (has a v3 vector) | `CVSSVector EXISTS` |
+| No asset owner | `assetOwner IS NULL`. Broad: it also matches scanner-only assets that have no CMDB record | |
 
 Group and subgroup ids come from `ac.py groups --search` and `ac.py subgroups --group ID`. Tag values are stored lowercase, so write them lowercase.
 
@@ -38,8 +42,8 @@ Group and subgroup ids come from `ac.py groups --search` and `ac.py subgroups --
 Each was validated as a column:
 
 - **Core:** `status`, `severity`, `toolSeverity`, `summary`, `source`, `scanType` (case-sensitive: `'SAST'`), `cve`, `cwe`, `componentName`, `id`, `developer`.
-- **Scope:** `product`, `subProduct`, `team`, `hierarchy`, `environment`, `tags`, `assetType` (`'HOST'`, …).
-- **Risk:** `riskScore`, `exploited`, `isCISAKEV`.
+- **Scope:** `product`, `subProduct`, `team`, `hierarchy`, `environment`, `tags`, `assetType` (`'HOST'`, …), `groupTier`, `assetOwner`.
+- **Risk:** `riskScore`, `exploited`, `isCISAKEV`, `baseScore`, `CVSSVector`.
 - **Time:** `foundOn`, `lastSeenDate`, `slaDueDate`, `findingAge` (days).
 - **Workflow:** `slaBreached`, `armorcodeTicketExists`.
 - **Correlation:** `isCorrelated`, `isUnique`, `remediationGroup`.
@@ -64,6 +68,12 @@ isUnique = true AND team = 345678 AND status IN ('OPEN','CONFIRMED','TRIAGE','IN
 
 # A specific CVE anywhere
 cve IN ('CVE-2021-44228')
+
+# CVSS 9.0+ findings in tier-1 groups
+status IN ('OPEN','CONFIRMED') AND groupTier = '1' AND baseScore >= 9
+
+# Open findings due within a week
+status IN ('OPEN','CONFIRMED','TRIAGE','IN_PROGRESS') AND slaDueDate BETWEEN 'now()' AND 'now() + 7d'
 ```
 
 ## AQL in other places

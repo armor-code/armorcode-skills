@@ -26,6 +26,8 @@
 
 Labels vary with the tenant's use case, and admins can rename them (Global Settings > Configuration > Titles). Use the user's words, and map them to the API terms yourself.
 
+Renaming an organization is UI-only, and `GET /business-unit/` isn't supported; read organizations with `GET /api/tenant/businessUnits` (`ac.py bus`).
+
 ## 2. Reading the org quickly
 
 | Need | Command | Endpoint |
@@ -75,7 +77,9 @@ Field formats:
 - **Tier risk tags**: when someone changes the tier in the UI, the UI swaps in that tier's tags (`business-impact:…`, `compliance:…`, `data-sensitivity:…`, `ext-facing:…`), and they drive the asset score. The API doesn't do this. Use `--tier-tags` to match the UI.
 - `classType`: `Software only` | `Software & Hardware` (older values exist).
 - `type`: `{"id": N}` from `GET /user/product-type`. Default types are global; custom types belong to the tenant. Look them up by name and never hard-code ids. A bare string returns 400.
-- Owners: `businessOwner`, `securityOwner`, `engineeringOwner`, `supportOwner`, `complianceOwner` as `{"id": userId}`. The UI only offers members of the group's assigned team (`teamDto: {"id": teamId}`), so pick owners from that team.
+- Owners: `businessOwner`, `securityOwner`, `engineeringOwner`, `supportOwner`, `complianceOwner` as `{"id": userId}`; they read back as `{id, email, displayName}`. The UI only offers members of the group's assigned team (`teamDto: {"id": teamId}`), so pick owners from that team.
+- **Assign a team (`--team-id`) and owners on every group.** Dashboard widgets and reports grouped by team leave out groups without one. Use the most specific team whose access scope covers the group.
+- `slaTemplateId`: the group's SLA policy (`--sla-template-id`; see `governance.md` §3).
 - `artifacts: [{name, link}]`: the whole list is replaced; the helper appends and dedupes.
 
 Bulk endpoints exist (`PATCH /v2/products/mass` **replaces** each group's tag list, up to 1000 groups; `PATCH /user/product/bulk`'s add-vs-replace semantics are unverified). Prefer the per-group helpers or `hierarchy-sync`. They're slower but safe.
@@ -128,6 +132,10 @@ Details of `PUT /user/tools/git/token/{repoId}` (Internal):
 - Echoing the whole listing record back has also failed. The helper builds the right body and records the previous mapping in the plan.
 
 An alternative route used for GitLab is `PUT /user/tools/git/repo {repoId, productId, subProductId, envId, envName, branchName, hostUrl}`. `branchName` is required.
+
+GitLab specifics:
+- Synced GitLab repository names look like `"<group> / <slug>"`. When matching repositories to subgroups by name, match on the URL slug (the last segment of `repoUrl`, without `.git`) rather than on `name`.
+- The GitLab integration can't be limited to one GitLab group, and there is no API to remove synced repositories. To keep other repositories out, connect with a token whose user sees only the intended groups, or leave the extra repositories unmapped.
 
 SCM sync stamps `armorcode.repo.*` tags on mapped subgroups: url, branch, topics, custom properties, CODEOWNERS entries and so on. Those tags are a convenient key for hierarchy and team automation.
 

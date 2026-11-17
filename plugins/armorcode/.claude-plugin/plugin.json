@@ -1,6 +1,6 @@
 {
   "name": "armorcode",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Work with your ArmorCode tenant from Claude through the ArmorCode REST API, with guardrails: report on findings and risk, build and clean up your org hierarchy (groups, subgroups, hierarchy tags), manage teams, repositories and scans, and triage findings in bulk. Every change is planned, shown as a dry run, approved by you and verified, with automatic backups and a local audit log.",
   "author": {
     "name": "ArmorCode",

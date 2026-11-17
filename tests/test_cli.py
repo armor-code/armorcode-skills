@@ -132,6 +132,18 @@ class Redaction(unittest.TestCase):
         self.assertEqual(out["nested"][0]["clientSecret"], "***redacted***")
 
 
+class ScanUploads(unittest.TestCase):
+    def test_in_flight_matches_tool_and_subgroup_only(self):
+        rows = [{"id": 1, "tool": "Tenable Vulnerability Management", "subproduct": {"id": 7}, "scanStatus": "IN_PROGRESS"},
+                {"id": 2, "tool": "Tenable Vulnerability Management", "subproduct": {"id": 7}, "scanStatus": "COMPLETED"},
+                {"id": 3, "tool": "Tenable Vulnerability Management", "subproduct": {"id": 8}, "scanStatus": "QUEUED"},
+                {"id": 4, "toolName": "Wiz", "subproduct": {"id": 7}, "scanStatus": "IN_PROGRESS"},
+                {"id": 5, "tool": "tenable vulnerability management", "subproduct": {"id": 7}, "scanStatus": "QUEUED"}]
+        busy = ac.scans_in_flight(rows, "Tenable Vulnerability Management", "7")
+        self.assertEqual([b["id"] for b in busy], [1, 5])
+        self.assertEqual(ac.scans_in_flight([], "Wiz", 7), [])
+
+
 class TokenSources(unittest.TestCase):
     def _file(self, mode):
         p = Path(TMP) / f"key-{mode:o}.txt"

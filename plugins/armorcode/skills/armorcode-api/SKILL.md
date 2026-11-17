@@ -4,7 +4,7 @@ description: Work with an ArmorCode tenant through the ArmorCode REST API, with 
 license: Apache-2.0
 compatibility: Requires Python 3.8+ and HTTPS access to your ArmorCode host (app.armorcode.com by default). Built for Claude Code, Claude Desktop and Cowork. In claude.ai the code sandbox must be allowed to reach that host.
 metadata:
-  version: "1.1.0"
+  version: "1.2.0"
   publisher: ArmorCode
 ---
 
@@ -102,7 +102,7 @@ The helpers handle these. Know them when reading output or using `plan raw`:
 2. **Whole tags are stored lowercase, key and value.** That includes hierarchy paths. Team access paths are matched case-sensitively, so write them lowercase.
 3. **A subgroup's GET `tags` is the effective list.** Its own tags are in `tagsMetaMap.SUB_PRODUCT` and the group's in `PRODUCT`. Inherited tags update a few seconds after a group change.
 4. **Tier is a tier id from RISK_TIERS** (often `"1"`, never `"Tier 1"`), and the API doesn't write the tier's risk tags the way the UI does. Use `--tier-tags`.
-5. **A scan upload replaces that tool's findings for the subgroup + environment.** Findings missing from the file are closed as MITIGATED, and an empty file closes them all. Never split one scan into chunks.
+5. **A scan upload replaces that tool's findings for the subgroup + environment.** Findings missing from the file are closed as MITIGATED, and an empty file closes them all. Never split one scan into chunks, and send one upload at a time per tool + subgroup: overlapping uploads don't deduplicate.
 6. **Status names differ from the UI.** UI "Mitigated" is `CONTROLLED`; UI "Remediated" is `MITIGATED`. AQL queries cover every status unless they restrict it. Plain filters on the findings search leave out MITIGATED. Always state which statuses a number includes.
 7. **The API ignores filters it doesn't understand and returns the unfiltered set.** That covers an unknown key, a string `"true"`, or a top-level `aqlQuery`. That is dangerous when the filter drives a write. `ac.py` refuses these; prefer AQL in `filters.aqlQueryV2`.
 8. **Bulk finding changes are async jobs.** A 200 means "accepted". The job can finish COMPLETED with some ids failed, and search counts lag up to a minute. `rulesOnFutureFindingsEnabled` silently creates a standing rule.
