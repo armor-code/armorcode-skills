@@ -59,7 +59,14 @@ security add-generic-password -s armorcode-prod -a "$USER" -w
 ```
 The `-w` with no value makes `security` prompt for the key, so it never enters shell history.
 
-**Windows / Linux:** use an environment variable set through your normal secret tooling (a vault agent, `pass`, a CI secret). Keychain integration is macOS-only.
+**Windows.** Store the key as a user environment variable, through the dialog so it never enters a shell history:
+1. Start menu: search for **Edit environment variables for your account**.
+2. Under *User variables*, click **New**. Name `ARMORCODE_TOKEN`, value: paste the key. Click OK.
+3. Quit and reopen Claude (and any terminal) so they pick it up. Git Bash and PowerShell both see it.
+
+Use `--token-env ARMORCODE_TOKEN` when creating the profile. The Keychain option is macOS-only, and the file option's permission check is skipped on Windows (protect the file with its folder's ACLs instead). If `python3` isn't found, run commands with `python` or `py -3`; install Python 3 from python.org (tick *Add python.exe to PATH*) or with `winget install Python.Python.3.12`.
+
+**Linux:** use an environment variable set through your normal secret tooling (a vault agent, `pass`, a CI secret).
 
 **File (fallback).** Put the key alone in a file and run `chmod 600` on it. `ac.py` refuses a file other users can read.
 
@@ -108,6 +115,7 @@ Rate limits that ArmorCode publishes: **2,000 requests/min per key, 200/min per 
 | Symptom | Cause | Fix |
 |---|---|---|
 | `Environment variable X is not set` | The shell that runs commands didn't load it | Put the export in `~/.zshenv` (macOS) or the shell profile, then open a new terminal |
+| `python3: command not found` (Windows) | Windows installs Python as `python` or `py` | Use `python` or `py -3`; install Python 3.8+ if neither works |
 | HTTP 401 | Wrong, expired or revoked key, or a key for another tenant | Create a new key; check the base URL |
 | HTTP 403 on every call | Wrong key type (e.g. Report Ingestion), or the role lacks read rights | Use an API-type key with a suitable role |
 | HTTP 403 on some writes | The role lacks that create/update permission | See `access.md` for the permission names |

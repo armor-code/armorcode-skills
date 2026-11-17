@@ -1,0 +1,55 @@
+name: Release
+
+# Push a tag like v1.1.0 (matching plugin.json) to build the zips and publish a GitHub Release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the tag matches the plugin version
+        run: |
+          ver=$(python -c "import json;print(json.load(open('plugins/armorcode/.claude-plugin/plugin.json'))['version'])")
+          if [ "v$ver" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match plugin version $ver"; exit 1
+          fi
+          echo "VERSION=$ver" >> "$GITHUB_ENV"
+
+      - name: Test
+        run: |
+          python tests/test_cli.py
+          python tests/test_guard.py
+
+      - name: Build zips
+        run: python tools/build.py
+
+      - name: Render the getting-started PDF
+        run: |
+          google-chrome --headless=new --no-sandbox --disable-gpu --no-pdf-header-footer \
+            --virtual-time-budget=10000 \
+            --print-to-pdf="dist/ArmorCode-for-Claude-Getting-Started-${VERSION}.pdf" \
+            "file://$PWD/docs/guide/getting-started.html"
+
+      - name: Release notes from CHANGELOG
+        run: python tools/release_notes.py "$VERSION" > dist/notes.md
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "dist/armorcode-plugin-${VERSION}.zip" \
+            "dist/armorcode-api-skill-${VERSION}.zip" \
+            "dist/ArmorCode-for-Claude-Getting-Started-${VERSION}.pdf" \
+            --title "ArmorCode for Claude ${VERSION}" \
+            --notes-file dist/notes.md

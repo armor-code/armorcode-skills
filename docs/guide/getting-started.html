@@ -12,7 +12,7 @@
   --mono:'JetBrains Mono',SFMono-Regular,Menlo,Consolas,monospace;
 }
 @page{size:Letter;margin:14mm 16mm 17mm 16mm;
-  @bottom-left{content:"© ArmorCode Inc. · ArmorCode for Claude 1.0.0 · Getting started";font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}
+  @bottom-left{content:"© ArmorCode Inc. · ArmorCode for Claude 1.1.0 · Getting started";font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}
   @bottom-right{content:counter(page) " / " counter(pages);font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -77,7 +77,7 @@ tbody tr:nth-child(even){background:var(--pale)}
   <img src="assets/logo-white.png" alt="ArmorCode">
   <h1>ArmorCode for Claude</h1>
   <p class="sub">Getting started with the <strong>armorcode-api</strong> skill and plugin</p>
-  <span class="badge">Version 1.0.0</span><span class="badge" style="background:#4C2DB6">Claude Code · Claude Desktop · claude.ai</span>
+  <span class="badge">Version 1.1.0</span><span class="badge" style="background:#4C2DB6">Claude Code · Claude Desktop · claude.ai</span>
   <p class="meta" style="margin-top:14px">Ask Claude to report on, organize and change your ArmorCode tenant in plain language. Claude shows you every change as a dry run first, and nothing changes until you approve it.</p>
 </div>
 
@@ -105,10 +105,10 @@ tbody tr:nth-child(even){background:var(--pale)}
 <div class="section-head" style="margin-top:8px"><img src="assets/logo-icon.png" alt=""><span class="num">1</span><h2>Before you start</h2></div>
 <ul class="check">
   <li><strong>The Claude Desktop app</strong> (Code tab or Cowork) or <strong>Claude Code</strong> in a terminal or IDE. These run the plugin's approval prompt. Plain chat works with limits (see Install).</li>
-  <li><strong>Python 3.8 or later</strong> on the machine where Claude runs commands. macOS and most Linux systems already have it.</li>
+  <li><strong>Python 3.8 or later</strong> on the machine where Claude runs commands. macOS and most Linux systems already have it. On Windows, install it from python.org (tick <em>Add python.exe to PATH</em>) or with <code>winget install Python.Python.3.12</code>.</li>
   <li><strong>HTTPS access</strong> from that machine to your ArmorCode host: <code>app.armorcode.com</code>, <code>eu.armorcode.com</code>, or your private instance.</li>
   <li>An ArmorCode user whose role can create API keys (the <em>Create Tools</em> permission).</li>
-  <li>One file from your ArmorCode team: <code>armorcode-plugin-1.0.0.zip</code>.</li>
+  <li>The plugin, from <strong>github.com/armor-code/armorcode-claude</strong> (see Install).</li>
 </ul>
 
 
@@ -116,27 +116,29 @@ tbody tr:nth-child(even){background:var(--pale)}
 <div class="page">
 <div class="section-head"><img src="assets/logo-icon.png" alt=""><span class="num">2</span><h2>Install</h2></div>
 
-<p style="margin-top:0">The same zip, <code>armorcode-plugin-1.0.0.zip</code>, works in every Claude app. It contains the skill and an approval hook: where the hook runs, Claude asks you before any change is sent to ArmorCode, even if Claude decided it should go ahead.</p>
-
-<h3>Claude Desktop app: Cowork and chat</h3>
-<ol>
-  <li>Open <strong>Customize › Plugins › Add › Upload plugin</strong>.</li>
-  <li>Choose <code>armorcode-plugin-1.0.0.zip</code> as is (don't unzip it).</li>
-</ol>
+<p style="margin-top:0">The plugin is published at <strong>github.com/armor-code/armorcode-claude</strong>. It contains the skill and an approval hook: where the hook runs, Claude asks you before any change is sent to ArmorCode, even if Claude decided it should go ahead.</p>
 
 <h3>Claude Desktop app: Code tab (and Claude Code in a terminal or IDE)</h3>
-<pre><span class="c"># 1. Unzip it somewhere it can stay</span>
-unzip armorcode-plugin-1.0.0.zip -d ~/armorcode-plugin
-
-<span class="c"># 2. In a Claude Code session (Desktop Code tab, terminal or IDE)</span>
-/plugin marketplace add ~/armorcode-plugin
+<pre><span class="c"># In a Claude Code session (Desktop Code tab, terminal or IDE)</span>
+/plugin marketplace add armor-code/armorcode-claude
 /plugin install armorcode@armorcode
 <span class="c">#    (in the Desktop Code tab you can also use + › Add plugins)</span>
 
 <span class="c"># or from a terminal</span>
+claude plugin marketplace add armor-code/armorcode-claude
+claude plugin install armorcode@armorcode</pre>
+<p class="muted">Start a new session afterwards. Updates come from GitHub (see Updating).</p>
+
+<h3>Claude Desktop app: Cowork and chat</h3>
+<ol>
+  <li>Download <code>armorcode-plugin-1.1.0.zip</code> from the repository's <strong>Releases</strong> page.</li>
+  <li>Open <strong>Customize › Plugins › Add › Upload plugin</strong> and choose the zip as is (don't unzip it).</li>
+</ol>
+
+<h3>Offline or without GitHub access</h3>
+<pre><span class="c"># unzip the release zip somewhere it can stay, then</span>
 claude plugin marketplace add ~/armorcode-plugin
 claude plugin install armorcode@armorcode</pre>
-<p class="muted">Start a new session afterwards. Keep the <code>~/armorcode-plugin</code> folder; updates are installed from it.</p>
 
 <h3>For everyone in your organization</h3>
 <p>A Claude organization admin can add it once under <strong>Organization settings › Plugins &amp; skills › Add › Upload plugin</strong>, and choose whether members can install it or get it by default.</p>
@@ -154,11 +156,13 @@ claude plugin install armorcode@armorcode</pre>
 <pre style="margin:.4em 0 0">security add-generic-password \
   -s armorcode-prod -a "$USER" -w
 <span class="c"># prompts for the key; nothing lands in shell history</span></pre></div>
-  <div class="card alt"><h4>Environment variable (any OS)</h4>
+  <div class="card alt"><h4>Environment variable (macOS, Linux)</h4>
 <pre style="margin:.4em 0 0"><span class="c"># add to ~/.zshenv (macOS) or your shell profile</span>
 export ARMORCODE_TOKEN="…"
 <span class="c"># then open a new terminal</span></pre></div>
 </div>
+<div class="card" style="margin-top:8px"><h4>Windows</h4>
+Start menu › <strong>Edit environment variables for your account</strong> › User variables › <strong>New</strong>: name <code>ARMORCODE_TOKEN</code>, value: the key. Then quit and reopen Claude so it picks the variable up.</div>
 <p class="muted" style="margin-top:8px">Claude reads the key only by the name of the variable or Keychain item; it never sees or prints the value. If a key is ever pasted into a chat, revoke it under Manage › Integrations and create a new one.</p>
 
 </div>
@@ -278,8 +282,8 @@ Apply     ac.py apply p-20261023-173030-49b7 --confirm f41f57</pre>
 </table>
 
 <div class="section-head" style="margin-top:16px"><img src="assets/logo-icon.png" alt=""><span class="num">11</span><h2>Updating and removing</h2></div>
-<p style="margin-top:0"><strong>Desktop app (Cowork and chat):</strong> upload the new zip under Customize › Plugins, replacing the old version. Remove it from the same screen.</p>
-<pre><span class="c"># Claude Code / Desktop Code tab, update: unzip the new version over ~/armorcode-plugin, then</span>
+<p style="margin-top:0"><strong>Desktop app (Cowork and chat):</strong> download the new zip from the Releases page and upload it under Customize › Plugins, replacing the old version. Remove it from the same screen.</p>
+<pre><span class="c"># Claude Code / Desktop Code tab, update from GitHub</span>
 claude plugin marketplace update armorcode
 claude plugin update armorcode@armorcode
 
@@ -288,7 +292,7 @@ claude plugin uninstall armorcode@armorcode
 claude plugin marketplace remove armorcode
 <span class="c"># optional: delete local profiles, plans, backups and the audit log</span>
 rm -r ~/.armorcode</pre>
-<p class="muted">Questions or unexpected behavior: contact your ArmorCode team with what you asked, the plan id and the time. Never include an API key.</p>
+<p class="muted">Questions or unexpected behavior: open an issue at github.com/armor-code/armorcode-claude or contact your ArmorCode team, with what you asked, the plan id and the time. Never include an API key or tenant data.</p>
 
 </div>
 

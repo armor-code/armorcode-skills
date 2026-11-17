@@ -132,5 +132,36 @@ class Redaction(unittest.TestCase):
         self.assertEqual(out["nested"][0]["clientSecret"], "***redacted***")
 
 
+class TokenSources(unittest.TestCase):
+    def _file(self, mode):
+        p = Path(TMP) / f"key-{mode:o}.txt"
+        p.write_text("file-token-value-1234567890\n", encoding="utf-8")
+        os.chmod(p, mode)
+        return {"token_file": str(p)}
+
+    @unittest.skipIf(os.name == "nt", "POSIX permission bits")
+    def test_group_readable_file_refused_on_posix(self):
+        with self.assertRaises(ac.Refused):
+            ac.resolve_token(self._file(0o644))
+        self.assertEqual(ac.resolve_token(self._file(0o600)), "file-token-value-1234567890")
+
+    def test_permission_bits_ignored_on_windows(self):
+        prof = self._file(0o644)
+        saved, ac.IS_WINDOWS = ac.IS_WINDOWS, True
+        try:
+            self.assertEqual(ac.resolve_token(prof), "file-token-value-1234567890")
+        finally:
+            ac.IS_WINDOWS = saved
+
+    def test_keychain_refused_off_macos(self):
+        saved, ac.sys.platform = ac.sys.platform, "win32"
+        try:
+            with self.assertRaises(ac.Refused) as cm:
+                ac.resolve_token({"token_keychain": "armorcode-prod"})
+            self.assertIn("--token-env", str(cm.exception))
+        finally:
+            ac.sys.platform = saved
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

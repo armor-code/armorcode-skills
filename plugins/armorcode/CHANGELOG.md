@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0 — 2026-11-16
+
+First public release, from github.com/armor-code/armorcode-claude, under the Apache License 2.0.
+
+- **Install from GitHub.** In Claude Code, `/plugin marketplace add armor-code/armorcode-claude` then `/plugin install armorcode@armorcode`; updates arrive with `claude plugin marketplace update armorcode`. Desktop zips and the getting-started PDF are attached to each GitHub Release.
+- **Windows support:**
+  - The approval hook finds Python as `python3`, `python` or `py`, so it no longer needs `python3` on the PATH. If no Python 3.8+ is found, it warns instead of blocking every command.
+  - `ac.py` no longer refuses key files on Windows because of POSIX permission bits that Windows doesn't have.
+  - The macOS Keychain option now explains that it's macOS-only and points to `--token-env`.
+  - Output can't crash a Windows console with a legacy code page.
+  - Setup docs cover storing the key as a Windows user environment variable and running `ac.py` with `python` or `py -3`.
+- **Hook false positives fixed:** commands that mention a hostname like `www.armorcode.com`, or that discard output with `2>/dev/null` or `2>&1`, are no longer mistaken for edits to the local state folder `~/.armorcode`.
+- Tests run on macOS, Windows and Linux in CI.
+
 ## 1.0.0 — 2026-10-23
 
 First release of the ArmorCode plugin for Claude.

@@ -1,5 +1,6 @@
 """Decision tests for the ArmorCode PreToolUse guard. Offline; run: python3 tests/test_guard.py"""
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -48,17 +49,31 @@ def main():
             ("Bash", "python3 /x/ac.py profile add prod-rw --token-env X --mode read-write", "ask"),
             ("Bash", "python3 /x/ac.py profile add prod --token-env X", "allow"),
             ("Bash", "set -e; python3 /x/ac.py ping", "allow"),
+            # Windows / other launchers
+            ("Bash", f"python /x/scripts/ac.py apply {PID} --confirm abc123", "ask"),
+            ("Bash", f"py -3 C:/Users/me/x/scripts/ac.py apply {PID} --confirm abc123", "ask"),
+            # redirections that only discard output are not writes
+            ("Bash", "grep -i -E 'x|.armorcode.io' notes.txt 2>/dev/null | head", "allow"),
+            ("Bash", f"ls {home}/plans 2>&1 | head", "allow"),
+            ("Bash", f"echo x > {home}/profiles.json 2>/dev/null", "deny"),
+            ("Bash", "rm -rf ~/.armorcode/plans", "deny"),
+            ("Bash", "python3 -c \"open('$HOME/.armorcode/profiles.json','w')\"", "deny"),
+            # a hostname is not the state folder
+            ("Bash", "python3 fix.py --url https://www.armorcode.com > out.json", "allow"),
             ("mcp__armorcode__update_findings", "", "ask"),
             ("mcp__armorcode__group_assets", "", "allow"),
             ("mcp__armorcode__action_list_findings", "", "allow"),
             ("mcp__armorcode__add_finding_comment", "", "ask"),
             ("mcp__ArmorCode__execute_runbook", "", "ask"),
         ]
+        # Keep the OS basics (Windows needs SYSTEMROOT) but no real ArmorCode settings.
+        env = {k: v for k, v in os.environ.items() if not k.upper().startswith("ARMORCODE")}
+        env["ARMORCODE_HOME"] = home
         fails = 0
         for tool, arg, want in cases:
             ti = {"command": arg} if tool == "Bash" else ({"file_path": arg} if tool in ("Write", "Edit") else {})
             r = subprocess.run([sys.executable, str(GUARD)], input=json.dumps({"tool_name": tool, "tool_input": ti}),
-                               capture_output=True, text=True, env={"ARMORCODE_HOME": home, "PATH": "/usr/bin:/bin"})
+                               capture_output=True, text=True, env=env)
             out = r.stdout.strip()
             got = json.loads(out)["hookSpecificOutput"]["permissionDecision"] if out else "allow"
             fails += got != want

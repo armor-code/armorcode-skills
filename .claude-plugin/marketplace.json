@@ -1,19 +1,33 @@
 {
   "name": "armorcode",
   "owner": {
-    "name": "ArmorCode"
+    "name": "ArmorCode",
+    "url": "https://www.armorcode.com"
   },
   "metadata": {
     "description": "ArmorCode's plugins for Claude.",
-    "version": "1.0.0"
+    "version": "1.1.0"
   },
   "plugins": [
     {
       "name": "armorcode",
       "source": "./plugins/armorcode",
       "description": "Guided access to the ArmorCode REST API: findings, org hierarchy, teams, repositories, scans and bulk triage, with dry runs, approvals, backups and verification on every change.",
-      "version": "1.0.0",
-      "category": "security"
+      "version": "1.1.0",
+      "author": {
+        "name": "ArmorCode"
+      },
+      "homepage": "https://github.com/armor-code/armorcode-claude",
+      "repository": "https://github.com/armor-code/armorcode-claude",
+      "license": "Apache-2.0",
+      "category": "security",
+      "keywords": [
+        "armorcode",
+        "aspm",
+        "vulnerability-management",
+        "security",
+        "api"
+      ]
     }
   ]
 }

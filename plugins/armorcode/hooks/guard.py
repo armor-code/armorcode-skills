@@ -112,9 +112,13 @@ def check_bash(cmd):
 
     # --- tampering with ac.py state -------------------------------------------------------------
     home = str(HOME)
-    if (home in cmd or ".armorcode" in cmd) and not re.search(r"ac\.py\b", cmd):
+    # Redirections that only discard or merge output (2>/dev/null, 2>&1) don't write anything.
+    quiet = re.sub(r"\d*>>?\s*(/dev/null|NUL)\b|\d*>&\d", " ", cmd)
+    # `.armorcode` as a path segment (~/.armorcode/...), not as part of a hostname like www.armorcode.com.
+    names_state = home in cmd or re.search(r"(?<![\w.-])\.armorcode(?=$|[/\\\s'\"])", cmd)
+    if names_state and not re.search(r"ac\.py\b", cmd):
         if re.search(r"(sed\s+-i|>\s*\S|>>|\btee\b|\bmv\b|\bcp\b|\brm\b|\bchmod\b|open\(.*['\"][wa]|write_text|"
-                     r"truncate|\bperl\s+-p?i)", cmd):
+                     r"truncate|\bperl\s+-p?i)", quiet):
             decide("deny", "Blocked: ArmorCode profiles, plans and the plan-signing key may only be changed through "
                            "ac.py (e.g. `ac.py profile add`), so every change keeps its review trail.")
 

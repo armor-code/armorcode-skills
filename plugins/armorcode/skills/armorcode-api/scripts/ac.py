@@ -32,7 +32,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
+IS_WINDOWS = os.name == "nt"
 DEFAULT_BASE_URL = "https://app.armorcode.com"
 HOME = Path(os.environ.get("ARMORCODE_HOME") or (Path.home() / ".armorcode")).expanduser()
 CONFIG_FILE = HOME / "profiles.json"
@@ -274,6 +275,10 @@ def resolve_token(prof):
                           "your shell profile (~/.zshenv is read by non-interactive shells) and open a new terminal.")
         return val
     if prof.get("token_keychain"):
+        if sys.platform != "darwin":
+            raise Refused("This profile reads its key from the macOS Keychain, which only exists on macOS. On this "
+                          "machine, store the key in an environment variable and re-add the profile with "
+                          "--token-env (see references/setup.md).")
         r = subprocess.run(["security", "find-generic-password", "-s", prof["token_keychain"], "-w"],
                            capture_output=True, text=True)
         if r.returncode != 0 or not r.stdout.strip():
@@ -284,7 +289,8 @@ def resolve_token(prof):
         p = Path(prof["token_file"]).expanduser()
         if not p.exists():
             raise Refused(f"Token file {p} does not exist.")
-        if p.stat().st_mode & (stat.S_IRWXG | stat.S_IRWXO):
+        # POSIX only: Windows reports every file as group/other readable, and protects files with ACLs instead.
+        if not IS_WINDOWS and p.stat().st_mode & (stat.S_IRWXG | stat.S_IRWXO):
             raise Refused(f"Token file {p} is readable by other users. Run: chmod 600 {p}")
         return p.read_text(encoding="utf-8").strip()
     raise Refused("Profile has no token source (token_env, token_keychain or token_file).")
@@ -1135,6 +1141,9 @@ def cmd_profile(args):
         if args.token_env:
             prof["token_env"] = args.token_env
         if args.token_keychain:
+            if sys.platform != "darwin":
+                raise Refused("--token-keychain uses the macOS Keychain, which only exists on macOS. Use --token-env "
+                              "with an environment variable instead (see references/setup.md).")
             prof["token_keychain"] = args.token_keychain
         if args.token_file:
             prof["token_file"] = args.token_file
@@ -2619,7 +2628,17 @@ COMMANDS = {"ping": cmd_ping, "bus": cmd_bus, "get": cmd_get, "query": cmd_query
 LOCAL_COMMANDS = {"plans": cmd_plans, "backups": cmd_backups, "audit": cmd_audit}
 
 
+def _safe_console():
+    """Windows consoles often use a legacy code page; print '?' rather than crash on a non-ASCII character."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
+
 def main(argv=None):
+    _safe_console()
     args = build_parser().parse_args(argv)
     try:
         if args.command == "profile":
