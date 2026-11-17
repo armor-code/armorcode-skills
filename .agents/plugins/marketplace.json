@@ -1,0 +1,20 @@
+{
+  "name": "armorcode",
+  "interface": {
+    "displayName": "ArmorCode"
+  },
+  "plugins": [
+    {
+      "name": "armorcode",
+      "source": {
+        "source": "local",
+        "path": "./plugins/armorcode"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Security"
+    }
+  ]
+}

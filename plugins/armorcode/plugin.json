@@ -1,0 +1,40 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "armorcode",
+  "version": "1.1.0",
+  "description": "Work with your ArmorCode tenant from your AI agent through the ArmorCode REST API, with guardrails: report on findings and risk, build and clean up your org hierarchy (groups, subgroups, hierarchy tags), manage teams, repositories and scans, and triage findings in bulk. Every change is planned, shown as a dry run, approved by you and verified, with automatic backups and a local audit log.",
+  "author": {
+    "name": "ArmorCode",
+    "url": "https://www.armorcode.com"
+  },
+  "homepage": "https://github.com/armor-code/armorcode-claude",
+  "repository": "https://github.com/armor-code/armorcode-claude",
+  "license": "Apache-2.0",
+  "keywords": [
+    "armorcode",
+    "aspm",
+    "rbvm",
+    "vulnerability-management",
+    "security",
+    "api",
+    "hierarchy",
+    "findings"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "ArmorCode",
+        "shortDescription": "Report on and manage your ArmorCode tenant through its API, with dry runs and approvals.",
+        "developerName": "ArmorCode",
+        "category": "Security",
+        "capabilities": ["Read", "Write"],
+        "websiteURL": "https://github.com/armor-code/armorcode-claude",
+        "defaultPrompt": [
+          "Set up the ArmorCode skill for our tenant using the ARMORCODE_TOKEN variable.",
+          "Show open critical findings by group.",
+          "Export our org hierarchy to a file I can keep in git."
+        ]
+      }
+    }
+  }
+}

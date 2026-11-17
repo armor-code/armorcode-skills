@@ -6,7 +6,7 @@
 3. Storing the key safely
 4. Creating profiles
 5. Hosts and network access
-6. Which Claude surface
+6. Which agent or app
 7. If something doesn't connect
 
 ---
@@ -38,7 +38,7 @@ A 403 means the key's role or scope doesn't allow that call, or the wrong key ty
 ## 2. Creating the key in ArmorCode
 
 1. Log in, go to **Manage > Integrations**, find **ArmorCode API**, and click **Create New Key**. If the button is disabled, the user's role lacks Create Tools.
-2. Name it after its purpose and the person, e.g. `claude-readonly-jdoe`. Choose type **API**, a role, an expiry and a scope.
+2. Name it after its purpose and the person, e.g. `ai-agent-readonly-jdoe`. Choose type **API**, a role, an expiry and a scope.
 3. Copy the key once, straight into the secret store from step 3. **Never paste it into the chat.**
 
 Docs: https://support.armorcode.com/hc/en-us/articles/19447589108499-Generating-ArmorCode-API-Key
@@ -62,7 +62,7 @@ The `-w` with no value makes `security` prompt for the key, so it never enters s
 **Windows.** Store the key as a user environment variable, through the dialog so it never enters a shell history:
 1. Start menu: search for **Edit environment variables for your account**.
 2. Under *User variables*, click **New**. Name `ARMORCODE_TOKEN`, value: paste the key. Click OK.
-3. Quit and reopen Claude (and any terminal) so they pick it up. Git Bash and PowerShell both see it.
+3. Quit and reopen your AI app (and any terminal) so they pick it up. Git Bash and PowerShell both see it.
 
 Use `--token-env ARMORCODE_TOKEN` when creating the profile. The Keychain option is macOS-only, and the file option's permission check is skipped on Windows (protect the file with its folder's ACLs instead). If `python3` isn't found, run commands with `python` or `py -3`; install Python 3 from python.org (tick *Add python.exe to PATH*) or with `winget install Python.Python.3.12`.
 
@@ -98,17 +98,23 @@ ac.py --profile prod ping
 | EU SaaS | `https://eu.armorcode.com` |
 | Private instance | `https://<customer>.armorcode.com` |
 
-The machine running Claude's commands needs outbound HTTPS to that host and to the cloud storage URL that scan uploads use. On a corporate proxy or VPN, `ac.py` uses the standard `HTTPS_PROXY` variable.
+The machine where the agent runs commands needs outbound HTTPS to that host and to the cloud storage URL that scan uploads use. On a corporate proxy or VPN, `ac.py` uses the standard `HTTPS_PROXY` variable.
 
 Rate limits that ArmorCode publishes: **2,000 requests/min per key, 200/min per endpoint, about 2 concurrent requests per key**, and all keys in a tenant share one quota. `ac.py` runs requests one at a time. It slows down when `X-Rate-Limit-Remaining` gets low and honors `X-Rate-Limit-Retry-After-Seconds`. On a 429 without that header (the concurrency limit), it backs off exponentially with jitter. When many integrations share a tenant, schedule large jobs off-peak.
 
-## 6. Which Claude surface
+## 6. Which agent or app
 
-| Surface | Works? | Notes |
+The skill is an open-standard Agent Skill, and `ac.py` is plain Python, so it works wherever an agent can load skills and run local commands. The guardrails that matter most (read-only profiles, plan signing, confirmation codes, the write gate) live in `ac.py` and work everywhere. The plugin's hook adds a second approval prompt where it can run.
+
+| Agent or app | Live calls? | Approval hook |
 |---|---|---|
-| Claude Code (CLI, desktop, IDE) | Yes, recommended | Install as a plugin to get the approval hooks (see the README that ships with the plugin). |
-| Claude Desktop / Cowork | Yes | Cowork runs plugin hooks too. Make sure the key's environment variable or Keychain item is visible to it. |
-| claude.ai (web) | Reference and drafting only, with no live calls, unless an admin allows network egress to your ArmorCode host | The sandbox can't read your local environment variables or Keychain. Don't paste keys there to work around it. |
+| Claude Code (terminal, IDE, Desktop Code tab), Claude Cowork | Yes | Yes: asks before every apply |
+| OpenAI Codex (CLI, app, IDE) | Yes | Blocks key exposure and state tampering; Codex doesn't support hook prompts yet, so use its approval mode |
+| GitHub Copilot (CLI, VS Code), Cursor, Gemini CLI, Grok Build, Windsurf, OpenCode and other Agent Skills clients | Yes | Not yet (the skill's plan-and-approve flow applies) |
+| Chat apps (claude.ai, ChatGPT, Gemini, Grok) | Reference and drafting only, unless an admin allows the code sandbox to reach your ArmorCode host | No |
+
+- The environment variable (or Keychain item) must be visible to the process the agent runs commands in. Desktop apps read it at launch, so restart them after setting it.
+- Don't paste keys into a chat to work around a sandbox. For live data in a chat app, use ArmorCode's hosted MCP server instead (see ArmorCode's documentation).
 
 ## 7. If something doesn't connect
 

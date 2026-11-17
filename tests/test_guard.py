@@ -60,6 +60,10 @@ def main():
             ("Bash", "python3 -c \"open('$HOME/.armorcode/profiles.json','w')\"", "deny"),
             # a hostname is not the state folder
             ("Bash", "python3 fix.py --url https://www.armorcode.com > out.json", "allow"),
+            # Codex: file edits arrive as apply_patch text
+            ("apply_patch", f"*** Begin Patch\n*** Update File: {home}/profiles.json\n@@\n-a\n+b\n*** End Patch", "deny"),
+            ("apply_patch", "*** Begin Patch\n*** Add File: notes/todo.md\n+hi\n*** End Patch", "allow"),
+            ("Edit", f"*** Begin Patch\n*** Update File: {home}/plans/{PID}.json\n*** End Patch", "deny"),
             ("mcp__armorcode__update_findings", "", "ask"),
             ("mcp__armorcode__group_assets", "", "allow"),
             ("mcp__armorcode__action_list_findings", "", "allow"),
@@ -71,7 +75,10 @@ def main():
         env["ARMORCODE_HOME"] = home
         fails = 0
         for tool, arg, want in cases:
-            ti = {"command": arg} if tool == "Bash" else ({"file_path": arg} if tool in ("Write", "Edit") else {})
+            if tool == "Bash" or "*** Begin Patch" in arg:
+                ti = {"command": arg}
+            else:
+                ti = {"file_path": arg} if tool in ("Write", "Edit") else {}
             r = subprocess.run([sys.executable, str(GUARD)], input=json.dumps({"tool_name": tool, "tool_input": ti}),
                                capture_output=True, text=True, env=env)
             out = r.stdout.strip()

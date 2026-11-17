@@ -4,7 +4,7 @@ Issues and pull requests are welcome. ArmorCode maintains this repository and re
 
 ## Reporting a problem
 
-Open an issue with the plugin version, your Claude surface and OS, what you asked Claude, and what happened (the `ac.py` command and plan id help). Remove API keys, tenant URLs and tenant data first. Security issues go through [SECURITY.md](SECURITY.md) instead.
+Open an issue with the plugin version, your agent and OS, what you asked Claude, and what happened (the `ac.py` command and plan id help). Remove API keys, tenant URLs and tenant data first. Security issues go through [SECURITY.md](SECURITY.md) instead.
 
 ## Making a change
 
@@ -17,7 +17,7 @@ Open an issue with the plugin version, your Claude surface and OS, what you aske
    python3 tests/test_cli.py
    python3 tests/test_guard.py
    ```
-5. For a release, bump the version in `plugins/armorcode/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` (both places), the skill's `metadata.version` in `SKILL.md` and `VERSION` in `ac.py` (`tools/build.py --check` fails if they disagree), and add a `CHANGELOG.md` entry.
+5. For a release, bump the version in `plugins/armorcode/.claude-plugin/plugin.json`, `plugins/armorcode/plugin.json`, `.claude-plugin/marketplace.json` (both places), the skill's `metadata.version` in `SKILL.md` and `VERSION` in `ac.py` (`tools/build.py --check` fails if they disagree), and add a `CHANGELOG.md` entry.
 
 ## Releasing (maintainers)
 

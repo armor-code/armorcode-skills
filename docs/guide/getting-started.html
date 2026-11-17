@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>ArmorCode for Claude: Getting Started</title>
+<title>ArmorCode for AI Agents: Getting Started</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 :root{
@@ -12,7 +12,7 @@
   --mono:'JetBrains Mono',SFMono-Regular,Menlo,Consolas,monospace;
 }
 @page{size:Letter;margin:14mm 16mm 17mm 16mm;
-  @bottom-left{content:"© ArmorCode Inc. · ArmorCode for Claude 1.1.0 · Getting started";font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}
+  @bottom-left{content:"© ArmorCode Inc. · ArmorCode for AI agents 1.1.0 · Getting started";font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}
   @bottom-right{content:counter(page) " / " counter(pages);font-family:Inter,Helvetica,sans-serif;font-size:7.5pt;color:#6B6B6B}}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -75,9 +75,9 @@ tbody tr:nth-child(even){background:var(--pale)}
 <!-- ============ COVER ============ -->
 <div class="cover">
   <img src="assets/logo-white.png" alt="ArmorCode">
-  <h1>ArmorCode for Claude</h1>
+  <h1>ArmorCode for AI agents</h1>
   <p class="sub">Getting started with the <strong>armorcode-api</strong> skill and plugin</p>
-  <span class="badge">Version 1.1.0</span><span class="badge" style="background:#4C2DB6">Claude Code · Claude Desktop · claude.ai</span>
+  <span class="badge">Version 1.1.0</span><span class="badge" style="background:#4C2DB6">Claude · Codex · Copilot · Cursor · Gemini · Grok</span>
   <p class="meta" style="margin-top:14px">Ask Claude to report on, organize and change your ArmorCode tenant in plain language. Claude shows you every change as a dry run first, and nothing changes until you approve it.</p>
 </div>
 
@@ -143,7 +143,20 @@ claude plugin install armorcode@armorcode</pre>
 <h3>For everyone in your organization</h3>
 <p>A Claude organization admin can add it once under <strong>Organization settings › Plugins &amp; skills › Add › Upload plugin</strong>, and choose whether members can install it or get it by default.</p>
 
-<div class="note warn"><strong>Where the approval prompt runs.</strong> The hook runs in the Desktop Code tab, Cowork, and Claude Code in a terminal or IDE. It doesn't run in plain chat, where the plan-and-approve step and the CLI's own refusal to send unapproved changes are the safeguards. In chat on claude.ai, live calls also need your admin to allow network access to your ArmorCode host. Never paste an API key into a chat.</div>
+<h3>Other AI agents</h3>
+<pre><span class="c"># OpenAI Codex (CLI, app, IDE)</span>
+codex plugin marketplace add armor-code/armorcode-claude
+codex plugin add armorcode@armorcode
+
+<span class="c"># GitHub Copilot CLI</span>
+copilot plugin marketplace add armor-code/armorcode-claude
+copilot plugin install armorcode@armorcode
+
+<span class="c"># Gemini CLI, Cursor, Windsurf, OpenCode and 70+ other agents (needs Node.js)</span>
+npx skills add armor-code/armorcode-claude</pre>
+<p class="muted">Without Node.js, unzip <code>armorcode-api-skill-1.1.0.zip</code> from the Releases page into <code>~/.agents/skills/</code>, which Codex, Gemini CLI, Copilot and others read. In VS Code, use <strong>Chat: Install Plugin from Source</strong> with the repository URL.</p>
+
+<div class="note warn"><strong>Where the approval prompt runs.</strong> The hook runs in the Desktop Code tab, Cowork, and Claude Code in a terminal or IDE. In Codex it blocks key leaks, and approvals come from Codex's own approval mode. Other agents rely on the skill's plan-and-approve step. It doesn't run in plain chat, where the plan-and-approve step and the CLI's own refusal to send unapproved changes are the safeguards. In chat on claude.ai, live calls also need your admin to allow network access to your ArmorCode host. Never paste an API key into a chat.</div>
 
 <div class="section-head" style="margin-top:16px"><img src="assets/logo-icon.png" alt=""><span class="num">3</span><h2>Create and store your API key</h2></div>
 <ol>

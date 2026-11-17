@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""PreToolUse guard for the ArmorCode plugin (Claude Code and Cowork).
+"""PreToolUse guard for the ArmorCode plugin (Claude Code, Cowork, Codex, and agents that run Claude-format hooks).
 
-Makes Claude Code ask the user before anything that changes an ArmorCode tenant runs, whatever the
+Makes the agent ask the user before anything that changes an ArmorCode tenant runs, whatever the
 model decided, and blocks the obvious ways of exposing the API key or tampering with ac.py's state:
 
   ask   `ac.py apply ...` (shows the plan's tenant, risk, steps and flags)
@@ -158,6 +158,15 @@ def check_edit(tool_input):
                        "may only be changed through ac.py.")
 
 
+PATCH_FILE = re.compile(r"^\*\*\* (?:Add|Update|Delete) File: (.+?)\s*$|^\*\*\* Move to: (.+?)\s*$", re.M)
+
+
+def check_patch(text):
+    """Codex apply_patch: the patch text names every file it touches."""
+    for m in PATCH_FILE.finditer(text or ""):
+        check_edit({"file_path": m.group(1) or m.group(2)})
+
+
 def check_mcp(tool):
     action = tool.split("__")[-1].lower()
     words = set(re.split(r"[_\-]+", action))
@@ -175,7 +184,12 @@ def main():
         if tool == "Bash":
             check_bash(tin.get("command", ""))
         elif tool in ("Write", "Edit", "MultiEdit", "NotebookEdit"):
-            check_edit(tin)
+            if "*** Begin Patch" in str(tin.get("command") or ""):
+                check_patch(tin.get("command"))      # Codex reports apply_patch as Edit/Write
+            else:
+                check_edit(tin)
+        elif tool == "apply_patch":
+            check_patch(tin.get("command") or tin.get("input") or "")
         elif tool.startswith("mcp__") and "armorcode" in tool.lower():
             check_mcp(tool)
     except SystemExit:

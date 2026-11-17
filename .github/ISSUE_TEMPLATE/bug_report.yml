@@ -10,19 +10,25 @@ body:
     id: version
     attributes:
       label: Plugin version
-      description: From `claude plugin list`, Customize > Plugins, or the zip name
+      description: From your agent's plugin list, `npx skills list`, or the zip name
       placeholder: "1.1.0"
     validations:
       required: true
   - type: dropdown
     id: surface
     attributes:
-      label: Where you use Claude
+      label: Which agent or app
       options:
         - Claude Code (terminal or IDE)
         - Claude Desktop, Code tab
         - Claude Desktop, Cowork
-        - Chat (Desktop or claude.ai)
+        - Claude chat (Desktop or claude.ai)
+        - OpenAI Codex
+        - GitHub Copilot (CLI or VS Code)
+        - Cursor
+        - Gemini CLI
+        - Grok Build
+        - Other (say which below)
     validations:
       required: true
   - type: dropdown

@@ -165,5 +165,5 @@ Check, in order:
 ### Export for BI (Power BI, Excel, a data lake)
 - Summary metrics: `findings count --by product --aql "<scope>" --out metrics.json`.
 - Row-level data: `findings list --aql "<scope>" --fields id,severity,status,title,product.name,subProduct.name,environment.name,source,cve,componentName,riskScore,foundOn,slaDueDate,developer --out findings.csv`.
-- Schedule it outside Claude (cron or CI) with the same commands and a read-only profile.
+- Schedule it outside the agent (cron or CI) with the same commands and a read-only profile.
 - ArmorCode can also email scheduled reports from saved views (`governance.md`).

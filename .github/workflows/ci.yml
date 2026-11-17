@@ -33,3 +33,47 @@ jobs:
         run: python tests/test_guard.py
       - name: Build zips
         run: python tools/build.py
+
+  agents:
+    name: Installs in each agent
+    runs-on: ubuntu-latest
+    env:
+      HOME_DIR: ${{ runner.temp }}/agent-home
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install the agent CLIs (pinned)
+        run: npm i -g skills@1.7.6 @openai/codex@0.167.0 @github/copilot@1.0.108 @google/gemini-cli@0.67.0 @anthropic-ai/claude-code
+      - name: Agent Plugins 1.0 manifest matches the published schema
+        run: |
+          pip install -q check-jsonschema
+          curl -fsSL https://raw.githubusercontent.com/agentplugins/agent-plugins-spec/main/schemas/1.0.0/plugin.schema.json -o /tmp/plugin.schema.json
+          check-jsonschema --schemafile /tmp/plugin.schema.json plugins/armorcode/plugin.json
+      - name: Claude Code plugin and marketplace manifests (strict)
+        run: |
+          claude plugin validate --strict .
+          claude plugin validate --strict plugins/armorcode
+      - name: Skills installer (Gemini CLI, Cursor, and others)
+        run: |
+          export HOME="$HOME_DIR"; mkdir -p "$HOME"
+          skills add "$GITHUB_WORKSPACE" --list | grep -q armorcode-api
+          skills add "$GITHUB_WORKSPACE" -g -y -a codex -a gemini-cli -a cursor -a github-copilot
+          python "$HOME/.agents/skills/armorcode-api/scripts/ac.py" --version
+          gemini skills list | grep -q armorcode-api
+      - name: Codex plugin
+        run: |
+          export HOME="$HOME_DIR" CODEX_HOME="$HOME_DIR/.codex"; mkdir -p "$CODEX_HOME"
+          codex plugin marketplace add "$GITHUB_WORKSPACE"
+          codex plugin add armorcode@armorcode
+          test -f "$CODEX_HOME"/plugins/cache/armorcode/armorcode/*/skills/armorcode-api/SKILL.md
+      - name: GitHub Copilot CLI plugin
+        run: |
+          export HOME="$HOME_DIR"
+          copilot plugin marketplace add "$GITHUB_WORKSPACE"
+          copilot plugin install armorcode@armorcode
+          copilot plugin list | grep -q armorcode@armorcode
