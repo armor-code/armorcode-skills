@@ -176,6 +176,8 @@ def check_mcp(tool):
 
 
 def main():
+    if "--check-python" in sys.argv[1:]:          # used by run-guard.sh to pick a working interpreter
+        sys.exit(0 if sys.version_info >= (3, 8) else 1)
     raw = sys.stdin.read()
     try:
         data = json.loads(raw)

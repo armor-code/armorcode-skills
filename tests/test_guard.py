@@ -86,7 +86,18 @@ def main():
             fails += got != want
             print(f"{'ok ' if got == want else 'XX '} {got:<6} want={want:<6} {tool:<36} {arg[:70]}")
         print(f"{len(cases) - fails}/{len(cases)} passed")
-        return 1 if fails else 0
+
+        # End to end: the exact command hooks.json gives the agent, through run-guard.sh.
+        hook = json.loads((ROOT / "plugins" / "armorcode" / "hooks" / "hooks.json").read_text())
+        cmd = hook["hooks"]["PreToolUse"][0]["hooks"][0]["command"]
+        assert cmd == 'sh "${CLAUDE_PLUGIN_ROOT}/hooks/run-guard.sh"', cmd
+        env2 = dict(env, CLAUDE_PLUGIN_ROOT=str(ROOT / "plugins" / "armorcode"))
+        script = str(ROOT / "plugins" / "armorcode" / "hooks" / "run-guard.sh")
+        r = subprocess.run(["sh", script], env=env2, capture_output=True, text=True, input=json.dumps(
+            {"tool_name": "Bash", "tool_input": {"command": f"python /x/ac.py apply {PID} --confirm x"}}))
+        e2e = r.returncode == 0 and '"permissionDecision": "ask"' in r.stdout
+        print(f"{'ok ' if e2e else 'XX '} hook command end to end via run-guard.sh (exit {r.returncode})")
+        return 1 if fails or not e2e else 0
 
 
 if __name__ == "__main__":

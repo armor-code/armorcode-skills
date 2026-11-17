@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "for p in python3 python py; do if command -v \"$p\" >/dev/null 2>&1 && \"$p\" -c 'import sys; sys.exit(sys.version_info < (3, 8))' </dev/null >/dev/null 2>&1; then exec \"$p\" \"${CLAUDE_PLUGIN_ROOT}/hooks/guard.py\"; fi; done; echo 'ArmorCode plugin: Python 3.8+ was not found, so its approval prompt is not running. Install Python 3 (see the README).' >&2; exit 1",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/run-guard.sh\"",
             "timeout": 10
           }
         ]

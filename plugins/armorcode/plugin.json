@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "armorcode",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Work with your ArmorCode tenant from your AI agent through the ArmorCode REST API, with guardrails: report on findings and risk, build and clean up your org hierarchy (groups, subgroups, hierarchy tags), manage teams, repositories and scans, and triage findings in bulk. Every change is planned, shown as a dry run, approved by you and verified, with automatic backups and a local audit log.",
   "author": {
     "name": "ArmorCode",
@@ -27,7 +27,10 @@
         "shortDescription": "Report on and manage your ArmorCode tenant through its API, with dry runs and approvals.",
         "developerName": "ArmorCode",
         "category": "Security",
-        "capabilities": ["Read", "Write"],
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
         "websiteURL": "https://github.com/armor-code/armorcode-skills",
         "defaultPrompt": [
           "Set up the ArmorCode skill for our tenant using the ARMORCODE_TOKEN variable.",

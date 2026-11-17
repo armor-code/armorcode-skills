@@ -4,7 +4,7 @@ description: Work with an ArmorCode tenant through the ArmorCode REST API, with 
 license: Apache-2.0
 compatibility: Requires Python 3.8+ and HTTPS access to your ArmorCode host (app.armorcode.com by default). Works in any agent that supports Agent Skills and can run local commands, such as Claude Code, Codex, GitHub Copilot, Cursor, Gemini CLI, Grok Build and others. In chat apps the code sandbox must be allowed to reach that host.
 metadata:
-  version: "1.2.0"
+  version: "1.2.1"
   publisher: ArmorCode
 ---
 

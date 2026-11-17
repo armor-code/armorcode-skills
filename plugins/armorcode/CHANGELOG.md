@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.1 — 2026-11-16
+
+Ready for Anthropic's plugin directory. Nothing changes in what the skill or `ac.py` does.
+
+- **A README in the plugin folder** says what the plugin runs, which hosts it connects to, how it handles the API key and what it stores locally. The directory shows it as the listing description, and its security scan compares the plugin's behavior against it.
+- **The approval hook runs from one script:** `hooks/run-guard.sh` finds Python 3.8+ (`python3`, `python` or `py`) and runs `guard.py`. The directory doesn't accept hook commands with loops, extra variables or inline code. Behavior is unchanged: if no Python is found, it warns and lets the call through, and `ac.py` still refuses to send any change outside `apply`.
+- **`displayName: "ArmorCode"`** in the Claude manifest.
+- **`tools/build.py` checks the directory's offline rules:** the plugin README (40+ words), the license, file types and sizes (under 256 KiB, at most 512 files), no system files or symlinks, and hook commands that name one file under `${CLAUDE_PLUGIN_ROOT}`.
+- A new test runs the real hook command end to end on macOS, Windows and Linux.
+
 ## 1.2.0 — 2026-11-16
 
 Works in any AI agent, not just Claude, and adds API behavior verified live on ArmorCode tenants. The repository is now **armor-code/armorcode-skills** (the old armorcode-claude URLs redirect).

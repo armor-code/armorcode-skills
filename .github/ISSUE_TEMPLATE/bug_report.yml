@@ -11,7 +11,7 @@ body:
     attributes:
       label: Plugin version
       description: From your agent's plugin list, `npx skills list`, or the zip name
-      placeholder: "1.2.0"
+      placeholder: "1.2.1"
     validations:
       required: true
   - type: dropdown

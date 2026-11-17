@@ -32,7 +32,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 IS_WINDOWS = os.name == "nt"
 DEFAULT_BASE_URL = "https://app.armorcode.com"
 HOME = Path(os.environ.get("ARMORCODE_HOME") or (Path.home() / ".armorcode")).expanduser()

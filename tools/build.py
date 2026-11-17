@@ -44,6 +44,57 @@ def frontmatter(text):
     return data, body
 
 
+TEXT_OK = {".md", ".json", ".py", ".sh", ".txt", ".csv", ".yml", ".yaml", ""}
+IMAGE_FONT = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".woff", ".woff2", ".ttf", ".otf"}
+HOOK_CMD = re.compile(r'^(sh|bash|python3?|node) "\$\{CLAUDE_PLUGIN_ROOT\}/[^"$*`?]+"$')
+
+
+def directory_checks():
+    """The Claude plugin directory's automated rules that can be checked offline
+    (https://claude.com/docs/plugins/pre-submission-checklist)."""
+    errors = 0
+    try:
+        import subprocess
+        files = subprocess.run(["git", "ls-files", "plugins/armorcode"], cwd=ROOT, capture_output=True,
+                               text=True, check=True).stdout.split()
+        files = [ROOT / f for f in files]
+    except Exception:
+        files = [f for f in PLUGIN.rglob("*") if f.is_file() and not (set(f.parts) & EXCLUDE)]
+    if len(files) > 512:
+        errors += fail(f"directory: plugin has {len(files)} files (max 512)")
+    for f in files:
+        rel = f.relative_to(ROOT)
+        if f.name in {".DS_Store", "Thumbs.db", "desktop.ini"} or "__MACOSX" in f.parts:
+            errors += fail(f"directory: system file {rel}")
+        if f.is_symlink():
+            errors += fail(f"directory: symlink {rel}")
+        if f.suffix.lower() in IMAGE_FONT:
+            continue
+        if f.suffix.lower() not in TEXT_OK and f.name != "LICENSE":
+            errors += fail(f"directory: {rel} is not a text, image or font file")
+        if f.exists() and f.stat().st_size >= 256 * 1024:
+            errors += fail(f"directory: {rel} is {f.stat().st_size // 1024} KiB (keep under 256 KiB)")
+    readme = PLUGIN / "README.md"
+    words = len(re.sub(r"```.*?```", " ", readme.read_text(encoding="utf-8"), flags=re.S).split()) if readme.exists() else 0
+    if words < 40:
+        errors += fail(f"directory: plugins/armorcode/README.md needs 40+ words outside code blocks (has {words})")
+    plugin = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())
+    if not (PLUGIN / "LICENSE").exists() and not plugin.get("license"):
+        errors += fail("directory: plugin needs a LICENSE file or a license field")
+    hooks = json.loads((PLUGIN / "hooks" / "hooks.json").read_text())
+    for event in hooks.get("hooks", {}).values():
+        for group in event:
+            for h in group.get("hooks", []):
+                if h.get("type") == "command" and not HOOK_CMD.match(h.get("command", "")):
+                    errors += fail(f"directory: hook command must be one file under ${{CLAUDE_PLUGIN_ROOT}} with no "
+                                   f"other variables, substitutions, wildcards or inline code: {h.get('command')}")
+                if h.get("type") == "command":
+                    target = ROOT / "plugins" / "armorcode" / h["command"].split("}/", 1)[-1].rstrip('"')
+                    if not target.exists():
+                        errors += fail(f"directory: hook command points at a missing file: {target}")
+    return errors
+
+
 def validate():
     errors = 0
     text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
@@ -112,6 +163,7 @@ def validate():
                 re.search(r'VERSION = "([\d.]+)"', (SKILL / "scripts" / "ac.py").read_text()).group(1)}
     if len(versions) != 1:
         errors += fail(f"version mismatch across the plugin manifests, marketplace.json, SKILL.md, ac.py: {versions}")
+    errors += directory_checks()
     print(f"{'OK' if not errors else 'ERRORS'}  name={name} description={len(desc)} chars, "
           f"SKILL.md body={lines} lines, version={versions}")
     return errors

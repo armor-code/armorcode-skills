@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "ArmorCode's plugins for Claude.",
-    "version": "1.2.0"
+    "version": "1.2.1"
   },
   "plugins": [
     {
       "name": "armorcode",
       "source": "./plugins/armorcode",
       "description": "Guided access to the ArmorCode REST API: findings, org hierarchy, teams, repositories, scans and bulk triage, with dry runs, approvals, backups and verification on every change.",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "author": {
         "name": "ArmorCode"
       },
